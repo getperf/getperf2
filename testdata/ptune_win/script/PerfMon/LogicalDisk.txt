@@ -1,0 +1,2 @@
+\LogicalDisk(*)\% Free Space
+\LogicalDisk(*)\Free Megabytes

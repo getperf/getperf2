@@ -1,0 +1,218 @@
+hostname()
+hostname -s
+
+hostname_fqdn()
+hostname --fqdn 2>/dev/null
+if [ \$? != 0 ]; then
+   echo 'Not Found'
+fi
+
+uname()
+uname -a
+
+lsb()
+cat /etc/*-release
+
+cpu()
+cat /proc/cpuinfo
+
+machineid()
+if [ -f /etc/machine-id ]; then
+    cat /etc/machine-id > ${work_dir}/machineid
+elif [ -f /var/lib/dbus/machine-id ]; then
+    cat /var/lib/dbus/machine-id > ${work_dir}/machineid
+fi
+
+meminfo()
+cat /proc/meminfo
+
+network()
+/sbin/ip addr
+
+net_onboot()
+cd /etc/sysconfig/network-scripts/
+grep ONBOOT ifcfg-* >> ${work_dir}/net_onboot
+
+net_route()
+/sbin/ip route
+
+net_bond()
+cd /etc/sysconfig/network-scripts/
+cat *-bond* 2>/dev/null
+if [ \$? != 0 ]; then
+   echo 'Not found'
+fi
+
+block_device()
+egrep -H '.*' /sys/block/*/size                      >> ${work_dir}/block_device
+egrep -H '.*' /sys/block/*/removable                 >> ${work_dir}/block_device
+egrep -H '.*' /sys/block/*/device/model              >> ${work_dir}/block_device
+egrep -H '.*' /sys/block/*/device/rev                >> ${work_dir}/block_device
+egrep -H '.*' /sys/block/*/device/state              >> ${work_dir}/block_device
+egrep -H '.*' /sys/block/*/device/timeout            >> ${work_dir}/block_device
+egrep -H '.*' /sys/block/*/device/vendor             >> ${work_dir}/block_device
+egrep -H '.*' /sys/block/*/device/queue_depth        >> ${work_dir}/block_device
+
+mdadb()
+cat /proc/mdstat
+
+filesystem()
+cat /etc/fstab
+
+lvm()
+mount
+
+filesystem_df_ip()
+df -iP
+
+fstab()
+cat /etc/fstab
+
+fips()
+cat /proc/sys/crypto/fips_enabled
+
+virturization()
+cat /proc/cpuinfo
+
+packages()
+rpm -qa --qf "%{NAME}\t%|EPOCH?{%{EPOCH}}:{0}|\t%{VERSION}\t%{RELEASE}\t%{INSTALLTIME}\t%{ARCH}\n"
+
+cron()
+sudo ls /var/spool/cron/ |cat
+
+yum()
+egrep -e '\[|enabled' /etc/yum.repos.d/*.repo
+
+resource_limits()
+egrep -v '^#' /etc/security/limits.d/*
+
+user()
+cat /etc/passwd
+
+group()
+cat /etc/group
+
+crontab()
+crontab -l
+
+service()
+test -f /usr/bin/systemctl ; echo $?
+してから、systemctl がある場合、
+/usr/bin/systemctl list-units --type service --all
+ない場合、
+/sbin/chkconfig --list
+
+mount_iso()
+mount
+
+oracle()
+ls -d /opt/oracle/app/product/*/* /*/app/oracle/product/*/* 2>/dev/null
+if [ \$? != 0 ]; then
+   echo 'Not found'
+fi
+
+proxy_global()
+grep proxy /etc/yum.conf
+if [ \$? != 0 ]; then
+    echo 'Not found'
+fi
+
+kdump()
+test -f /usr/bin/systemctl ; echo $?
+してから、systemctl がある場合、
+/usr/bin/systemctl status kdump
+ない場合、
+/sbin/chkconfig --list|grep kdump
+
+crash_size()
+cat /sys/kernel/kexec_crash_size 2>/dev/null
+if [ \$? != 0 ]; then
+   echo 'Unkown crash_size. kdump:'
+   cat /sys/kernel/kexec_crash_loaded
+fi
+
+kdump_path()
+egrep -e '^(path|core_collector)' /etc/kdump.conf 2>/dev/null
+if [ \$? != 0 ]; then
+   echo 'Not found'
+fi
+
+iptables()
+/usr/bin/systemctl status iptables firewalld
+または、
+/sbin/chkconfig --list|grep iptables
+
+runlevel()
+/usr/bin/systemctl get-default
+または、
+grep :initdefault /etc/inittab
+
+resolve_conf()
+grep nameserver /etc/resolv.conf 2>/dev/null
+if [ \$? != 0 ]; then
+   echo 'Not Found'
+fi
+
+grub()
+grep GRUB_CMDLINE_LINUX /etc/default/grub 2>/dev/null
+if [ \$? != 0 ]; then
+   echo 'Not found'
+fi
+
+ntp()
+egrep -e '^server' /etc/ntp.conf 2>/dev/null
+if [ \$? != 0 ]; then
+   echo 'Not found'
+fi
+
+ntp_slew()
+grep -i options /etc/sysconfig/ntpd 2>/dev/null
+if [ \$? != 0 ]; then
+   echo 'Not found'
+fi
+
+snmp_trap()
+cat /etc/snmp/snmpd.conf >> ${work_dir}/snmp_trap; echo \$?
+
+sestatus()
+/usr/sbin/sestatus
+
+keyboard()
+if [ -f /etc/sysconfig/keyboard ]; then
+    cat /etc/sysconfig/keyboard > ${work_dir}/keyboard
+elif [ -f /etc/vconsole.conf ]; then
+    cat /etc/vconsole.conf > ${work_dir}/keyboard
+fi
+
+vmwaretool_timesync()
+LANG=c /usr/bin/vmware-toolbox-cmd timesync status 2>/dev/null
+if [ \$? == 127 ]; then
+   echo 'Not found'
+fi
+
+vmware_scsi_timeout()
+cat /etc/udev/rules.d/99-vmware-scsi-udev.rules 2>/dev/null
+if [ \$? != 0 ]; then
+   echo 'Not found'
+fi
+
+language()
+cat /proc/cmdline
+
+timezone()
+if [ -x /bin/timedatectl ]; then
+    /bin/timedatectl > ${work_dir}/timezone
+elif [ -f /etc/sysconfig/clock ]; then
+    cat /etc/sysconfig/clock > ${work_dir}/timezone
+fi
+
+error_messages()
+egrep -i \'(error|warning|failed)\' /var/log/messages | head -100
+
+oracle_module()
+ls /root/package/* >> ${work_dir}/oracle_module; echo \$?
+
+vncserver()
+/usr/bin/systemctl status vncserver
+または、
+/sbin/chkconfig --list|grep vncserver

@@ -1,0 +1,10 @@
+\Process(*)\% Processor Time
+\Process(*)\Working Set
+\Process(*)\Page File Bytes
+\Process(*)\Private Bytes
+\Process(*)\Thread Count
+\Process(*)\Virtual Bytes
+\Process(*)\IO Read Bytes/sec
+\Process(*)\IO Read Operations/sec
+\Process(*)\IO Write Bytes/sec
+\Process(*)\IO Write Operations/sec

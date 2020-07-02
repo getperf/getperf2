@@ -1,0 +1,4 @@
+\Memory\Available Bytes
+\Memory\Committed Bytes
+\Memory\Page Faults/sec
+\Memory\Pages/sec

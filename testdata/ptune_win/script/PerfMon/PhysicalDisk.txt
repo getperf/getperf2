@@ -1,0 +1,8 @@
+\PhysicalDisk(*)\Disk Reads/sec
+\PhysicalDisk(*)\Disk Read Bytes/sec
+\PhysicalDisk(*)\Disk Writes/sec
+\PhysicalDisk(*)\Disk Write Bytes/sec
+\PhysicalDisk(*)\Avg. Disk sec/Read
+\PhysicalDisk(*)\Avg. Disk sec/Write
+\PhysicalDisk(*)\Avg. Disk Queue Length
+\PhysicalDisk(*)\% Idle Time

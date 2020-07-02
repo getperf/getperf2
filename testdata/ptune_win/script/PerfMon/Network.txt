@@ -1,0 +1,9 @@
+\Network Interface(*)\Bytes Received/sec
+\Network Interface(*)\Bytes Sent/sec
+\Network Interface(*)\Packets Received/sec
+\Network Interface(*)\Packets Sent/sec
+\Network Interface(*)\Output Queue Length
+\Network Interface(*)\Packets Received Discarded
+\Network Interface(*)\Packets Received Errors
+\Network Interface(*)\Packets Outbound Discarded
+\Network Interface(*)\Packets Outbound Errors

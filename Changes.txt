@@ -1,0 +1,212 @@
+Changes for 1.11.0 (2020-7-5)
+--------------------------------------------------------------------------------
+* WinRM によるWindows インベントリリモート採取シナリオ追加
+
+Changes for 1.10.0 (2020-6-26)
+--------------------------------------------------------------------------------
+* HP iLO インベントリ採取シナリオ(hpiloconf)追加
+
+Changes for 1.9.0 (2020-6-13)
+--------------------------------------------------------------------------------
+* エージェント採取データ取得コマンド; gconf get 追加
+* gconf get に TLS クライアント認証方式オプション追加
+* getperf エージェントにサーバ証明書管理を追加。ptune/network/server下に保存
+* Windows インベントリ収集シナリオの追加コマンドをPowerShellからcmdに変更
+
+Bug fix:
+* リモート採取時にターゲットログディレクトリが作成されない問題対処
+
+Changes for 1.8.0 (2020-6-1)
+--------------------------------------------------------------------------------
+* Go 製インベントリ採取コマンド gconf 追加
+  * Windows シナリオ
+  * Linux シナリオ
+  * VMWare シナリオ
+* エージェントに Zip ファイルダウンロード用Webサービス追加 
+
+Changes for 1.7.0 (2020-2-28)
+--------------------------------------------------------------------------------
+* VMWare シナリオ調査 [x]
+  * 現行シナリオ採取項目整理 [x]
+  * govmomi 移行 vm config, extra 情報 [x]
+  * govmomi 移行 vm device 情報 [x]
+  * govmomi 移行 vm nic 情報 [x]
+  * govmomi 移行 vm storage 情報 [x]
+  * json 容量調査 [x]
+* エージェントプロト テンプレートメソッド実装
+  * 採取セッションテンプレート(SSH, JSON-RPC, PowerShell)
+  * 鍵管理方式(SSH, HTTPS)
+  * 各プラットフォームシナリオテンプレート(Linux, Zabbix)
+* Linux 、Zabbix シナリオプロトシミュレータ検討
+* ツール連携プロト実装
+  * ファイルダウンロード
+  * ファイルアップロード
+
+Changes for 1.6.0 (2020-1-28)
+--------------------------------------------------------------------------------
+* Getconfig プロトタイプ [x]
+  * Zabbix インベントリ採取プロト [x]
+  * Windows インベントリ採取プロト [x]
+  * VMWare インベントリ採取プロト [x]
+  * ファイル転送プロトコル調査 []
+
+Changes for 1.6.0 (2020-1-28)
+--------------------------------------------------------------------------------
+* ログ見直し [x]
+  * INFO レベルログ [x]
+  * Debug レベルログ [x]
+  * Windows ログ [x]
+  * Error レベルログエラーハンドリング [x]
+* Windows 負荷問題対策 [x]
+  * typeperf 再現シナリオ作成 [x]
+  * shellwords 調査 [x]
+  * 変更調査 [x]
+  * 単体テスト [x]
+  * ヒートラン [x]
+* PowerShell スクリプトジェネレーター [x] misc\basic\template3.go
+  * template ライブラリ調査 [x]
+  * PowerShell テンプレートプロト [x]
+  * 外部コマンド実行プロト [x]
+* エージェントソケット通信 [x]
+* ファイル転送プロト [x]
+
+Changes for 1.5.0 (2020-1-14)
+--------------------------------------------------------------------------------
+New features:
+* 採取コマンド実行前にスクリプトディレクトリに移動する処理追加 [x]
+* Windows 結合 []
+  * Debug ログレベル変更設定 [x]
+  * windows_system_info.bat スクリプト実行 [x]
+  * typeperf コマンド ProcessorMemory.txt 実行 [x]
+  * PowerShell コマンド 実行 [x]
+    ワンライナーなら実行可能 
+    powershell -Command get-wmiobject -Class Win32_ComputerSystem
+   　misc/ps1.go にて "github.com/bhendo/go-powershell" を継続調査 
+  * コマンド周りのログ出力改善 []
+  * サービス起動設定 []
+  * タイムアウト動作 [x]
+  * Windows 集計スクリプト結合 [x]
+  * SystemInfo 集計スクリプト結合  [x]
+* Linux 結合 [x]
+  * デーモンプロセス化 [x]
+  * Linux 集計スクリプト結合 [x]
+  * SystemInfo 集計スクリプト結合  [x]
+* ヒートラン [x]
+  ./gops memstats 18959
+  ./gops stats 18959
+* ライセンス更新結合 [x]
+
+Bug fix:
+* STAT_ENABLE, STAT_MODE パラメータが有効にならない問題対処 [x]
+* Windows 採取コマンドが即時終了する問題。リダイレクト先のファイルパス名を"{path}"
+  で囲むと\"{path}\" に展開され、コマンド実行時にコマンド引数の解析でエラーとなる
+  展開させない修正が望ましいが、不明なため \" を除く様に暫定対処 [x]
+* Windows エラーログがバイナリのBinHex 出力になる問題。ShiftJIS をUTF-8にエンコード
+  する様に変更 [x]
+* Windows でコマンドをパイプ形式で実行すると、タイムアウトを受け付けない問題 [x]
+  リファレンス: https://github.com/golang/go/issues/21922
+  "github.com/Songmu/timeout" ライブラリを適用し、パイプ出力時も受け付ける様にした
+* Windows で CTRL-C しても stop process を受け付けない問題。SOAP送信コマンド実行時に起きる
+  https://qiita.com/codehex/items/620f9504daf2ec53f0b5
+  https://qiita.com/arc279/items/6154919702b2fa408c72
+* Windows でZip圧縮したディレクトリパスはファイル名として展開されてしまう問題対処 [x]
+  Windows\20200109\141630\ProcessorMemory.csv など
+* YAML レポートで不要な折り返し処理をしない様に変更 [x]
+
+Changes for 1.4.0 (2020-1-7)
+--------------------------------------------------------------------------------
+New features:
+* task.go 移行/テスト [x]
+  * リダイレクト実行 [x]
+  * 非リダイレクト実行 [x]
+  * 定期実行 [x]
+  * Report 構造体作成 [x]
+  * スケジューラ [x]  go test -v -run  TestConcurrentTask
+* soap 周りの移行/テスト [x] 外部コマンド getperfsoap を実行する方式に変更
+  * CheckAgent 移行 [x]
+  * MIME 添付 API 調査 [x]
+  * データ送信用 移行 [x]
+  * 管理用 移行 [x]
+* param.go 残りの移行/テスト [x]
+  * プロキシー環境変数設定 gpfCheckHttpProxyEnv() 移行 [x] 取り下げ
+  * SSL 設定 gpfLoadSSLLicense() 移行 [x]
+* Process.go 結合 [x]
+  * コマンドパラメータ実行 [x]
+  * Go ルーチン化 [x]
+* agent.go 移行/テスト [x]
+  * 初期化処理移行 [x]
+    * CheckExitFile() [x]
+    * CheckHostname() [x]
+    * CheckHAStatus() [x]
+    * AuthLicense() [x]
+  * アーカイバ移行 [x]
+    * UnzipSSLConf() [x]
+    * ArchiveData() [x]
+  * ライセンス管理移行 [x]
+    * gpfCheckLicense() [x]
+  * スケジュール管理 [x]
+  * SOAPコマンド管理 [x]
+    * ExecSOAPCommandPM()   [x]
+    * SendCollectorData() [x]
+    * SendCollectorDataAll()   [x]
+  * その他 [x]
+    * PurgeData() [x]
+* ログ管理 [x]
+  * ログ管理API [x]
+  * ログメッセージ調整 [x]
+
+Bug fixes:
+* Windows で testdata\stubcmd.exe を実行すると「アクセスが拒否されました」エラーが
+  発生する問題対処 [x]
+
+Changes for 1.3.0 (2019-12-23)
+--------------------------------------------------------------------------------
+New features:
+* common.go 移行/テスト [x]
+* Windows環境でディスク容量確認API調査 [x]
+* param.go 移行/テスト [x]
+  * Scheduler 構造体作成 [x]
+  * Collector 構造体作成 [x]
+  * Job 構造体作成 [x]
+  * 1行パラメータ読み込み Base [x]
+  * 1行パラメータ読み込み Collector [x]
+  * 1行パラメータ読み込み Job [x]
+  * Schedule 初期設定 [x]
+  * getperf.ini ファイル読み込み [x]
+  * conf 下ファイル読み込み [x]
+  * 例外テスト [x]
+  * バリデーター gpfCheckSchedule() 移行 [x] ※簡易チェックのみ
+* process.go 移行/テスト [x]
+  * 基本動作 [x]
+  * タイムアウト処理 [x]
+
+Bug fixes:
+* go test . で import clycle not allowed in test エラーが発生する問題対処
+* common_test.go でパッケージ名.関数として宣言しないと not found エラーになる問題対処
+
+Changes for 1.2.0 (2019-12-16)
+--------------------------------------------------------------------------------
+New features:
+* コマンド引数パーサーのテストコード作成 [x]
+* include/gpf_common.h 移行、UML 作成 [x]
+* 既存コード移行。メンバーとメソッドのみ [x]
+  * common.go : gpf_common.c
+  * param.go : gpf_param.c
+  * agent.go : getperf.c / gpf_agent.c 
+  * soap.go : getperfsoap.c / gpf_soap_common.c / 
+            　gpf_soap_agent.c / gpf_soap_admin.c
+  * config.go : gpf_config.c / gpf_getopt.c
+  * log.go : gpf_log.c / gpf_logrt.c / logretrieve.c / eventlog.c
+  * process.go : gpf_process.c
+  * service.go : gpf_service.c / gpf_daemon.c / gpfpanel.c
+
+Changes for 1.1.0 (2019-12-13)
+--------------------------------------------------------------------------------
+New features:
+* Getperf エージェント2プロトタイプ
+  * SOAP クライアント
+  * 外部コマンド実行
+  * 設定ファイルパーサー
+  * タイムアウト処理
+
+Bug fixes:

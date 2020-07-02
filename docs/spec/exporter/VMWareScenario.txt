@@ -1,0 +1,83 @@
+既存シナリオ調査
+================
+
+vCenterSpec
+-----------
+
+vCenterSpec.groovy: vm(test_item)
+|Get-VM $vm | `
+| select NumCpu, PowerState, MemoryGB, VMHost, @{N="Cluster";E={Get-Cluster -VM $_}} | `
+| Format-List
+
+vCenterSpec.groovy: vmext(test_item)
+|(Get-VM $vm | select ExtensionData).ExtensionData.config | `
+| Select Name,CpuHotAddEnabled,MemoryReservationLockedToMax,MemoryHotAddEnabled | `
+| Format-List
+
+vCenterSpec.groovy: vm_conf(test_item)
+|Get-VMResourceConfiguration -VM $vm | `
+|FL
+
+vCenterSpec.groovy: datastore(test_item)
+Get-Datastore -VM $vm | FL
+
+vCenterSpec.groovy: vm_storage(test_item)
+| Get-Harddisk -VM $vm | `
+| select Parent, Filename,CapacityGB, StorageFormat, DiskType | `
+| Format-List
+
+vCenterSpec.groovy: vmnet(test_item)
+Get-NetworkAdapter -VM $vm | FL
+
+vCenterSpec.groovy: vmwaretool(test_item)
+|Get-VM $vm | `
+| Get-AdvancedSetting vmware.tools.internalversion,vmware.tools.requiredversion | `
+| Select Name, Value
+
+vCenterSpec.groovy: vm_timesync(test_item)
+|Get-VM $vm |
+|Select @{N=\'TimeSync\';E={$_.ExtensionData.Config.Tools.syncTimeWithHost}} |
+|Format-List
+
+vCenterSpec.groovy: vm_iops_limit(test_item)
+|Get-VMResourceConfiguration -VM $vm | `
+|format-custom -property DiskResourceConfiguration
+
+vCenterSpec.groovy: vm_floppy(test_item)
+
+|Get-Vm $vm | Get-FloppyDrive | `
+| Select Parent, Name, ConnectionState | `
+| Format-List
+
+vCenterSpec.groovy: vm_nic_limit(test_item)
+|Get-VM $vm | Get-NetworkAdapter |
+|sort Parent,{$_.ExtensionData.ResourceAllocation.Limit} |
+|select Parent,Name,{$_.ExtensionData.ResourceAllocation.Limit}
+
+vCenterSpec.groovy: vm_video_ram(test_item)
+|Get-VM $vm | `
+| Select @{N="VideoRamSizeInKB";E={($_.ExtensionData.Config.Hardware.Device | `
+| where {$_.key -eq 500}).VideoRamSizeInKB}} | Sort-Object Name | `
+| Format-List
+
+VMHostSpec
+----------
+
+VMHostSpec.groovy: VMHost(test_item)
+Get-VMHost $vm | Format-List
+
+VMHostSpec.groovy: Account(test_item)
+Get-VMHostAccount | Format-Table -Auto
+
+VMHostSpec.groovy: NetworkAdapter(test_item)
+Get-VMHostNetworkAdapter -VMHost $vm | Format-Table -Auto
+
+VMHostSpec.groovy: Disk(test_item)
+Get-VMHostDisk -VMHost $vm | Format-List
+
+VMHostSpec.groovy: DiskPartition(test_item)
+Get-VMHost $vm | Get-VMHostDisk | Get-VMHostDiskPartition | Format-List
+
+VMHostSpec.groovy: Datastore(test_item)
+Get-Datastore -VMHost $vm | Format-Table -Auto
+

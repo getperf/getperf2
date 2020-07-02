@@ -1,0 +1,11 @@
+\Processor(_Total)\% User Time
+\Processor(_Total)\% Privileged Time
+\Processor(_Total)\% Interrupt Time
+\Processor(_Total)\% Idle Time
+\System\Processor Queue Length
+\System\Processes
+\System\Threads
+\Memory\Available Bytes
+\Memory\Committed Bytes
+\Memory\Page Faults/sec
+\Memory\Pages/sec

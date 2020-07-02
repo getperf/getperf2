@@ -1,0 +1,20 @@
+\PhysicalDisk(*)\Disk Reads/sec
+\PhysicalDisk(*)\Disk Read Bytes/sec
+\PhysicalDisk(*)\Disk Writes/sec
+\PhysicalDisk(*)\Disk Write Bytes/sec
+\PhysicalDisk(*)\Avg. Disk sec/Read
+\PhysicalDisk(*)\Avg. Disk sec/Write
+\PhysicalDisk(*)\Avg. Disk Queue Length
+\PhysicalDisk(*)\% Idle Time
+\Network Interface(*)\Bytes Received/sec
+\Network Interface(*)\Bytes Sent/sec
+\Network Interface(*)\Bytes Total/sec
+\Network Interface(*)\Packets Received/sec
+\Network Interface(*)\Packets Sent/sec
+\Network Interface(*)\Output Queue Length
+\Network Interface(*)\Packets Received Discarded
+\Network Interface(*)\Packets Received Errors
+\Network Interface(*)\Packets Outbound Discarded
+\Network Interface(*)\Packets Outbound Errors
+\LogicalDisk(*)\% Free Space
+\LogicalDisk(*)\Free Megabytes

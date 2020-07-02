@@ -1,0 +1,44 @@
+
+# Windows inventory exporter settings
+# When collecting the inventory of Windows platform, execute it locally.
+# Therefore, no template setting is required
+
+local_exec = true
+
+## Enter the information for login account of remote linux server
+# 
+## example:
+# 
+# [[servers]]
+# 
+# server = "centos8"    # server name
+# url = "192.168.10.1"  # server address, example: 192.168.0.1 , 192.168.0.1:22
+# user = "test_user"
+# password = "P@ssword"
+# ssh_key = ""          # ssh private key path, ignore if it not set
+
+[[servers]]
+
+server = "w2016"
+url = "192.168.0.27"
+user = "Administrator"
+password = "P@ssw0rd"
+insecure = true
+
+## Describe the additional command list. Added to the default command list for
+## Windows Inventory scenarios. The text parameter using escape codes such as
+## '\"', '\\', See these example,
+#
+## example:
+# 
+# [[commands]]
+#
+# id = "echo"   # unique key
+# level = 0      # command level [0-2]
+# text = "echo 1"
+
+[[commands]]
+
+id = "echo"   # unique key
+level = 0      # command level [0-2]
+text = "echo 1"
