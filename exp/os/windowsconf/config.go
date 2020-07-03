@@ -47,6 +47,7 @@ local_exec = true
 # password = "P@ssword"
 # ssh_key = ""          # ssh private key path, ignore if it not set
 
+{{if ne .Url "" }}
 [[servers]]
 
 server = "{{ .Server }}"
@@ -54,6 +55,7 @@ url = "{{ .Url }}"
 user = "{{ .User }}"
 password = "{{ .Password }}"
 insecure = true
+{{end}}
 
 ## Describe the additional command list. Added to the default command list for
 ## Windows Inventory scenarios. The text parameter using escape codes such as
@@ -63,7 +65,8 @@ insecure = true
 # 
 # [[commands]]
 #
-# id = "echo"   # unique key
+# id = "echo"    # unique key
+# type = "Cmd"   # Cmd : cmd.exe -c "..." , Cmdlet : PowerShell -Command {...}
 # level = 0      # command level [0-2]
 # text = "echo 1"
 `

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/dpotapov/winrm-auth-ntlm"
@@ -18,6 +19,15 @@ import (
 // 	defaultTimeoutDuration = 300 * time.Second
 // 	timeoutKillAfter       = 1 * time.Second
 // )
+
+func convCommandLine(str, nlcode string) string {
+	return strings.NewReplacer(
+		"\r\n", nlcode,
+		"\r", nlcode,
+		"\n", nlcode,
+		"\t", nlcode,
+	).Replace(str)
+}
 
 func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Server) error {
 	log.Infof("server : %v", sv)
@@ -52,7 +62,17 @@ func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Serv
 			return HandleError(e.errFile, err, "prepare inventory log")
 		}
 		defer outFile.Close()
-		if _, err = client.Run(command.Text, outFile, e.errFile); err != nil {
+		var cmd string
+		if command.Type == "Cmdlet" {
+			cmd = fmt.Sprintf("PowerShell.exe -command \"& { %s }\"", convCommandLine(command.Text, " "))
+		} else if command.Type == "Cmd" {
+			cmd = fmt.Sprintf("cmd.exe /c \"%s\"", command.Text)
+		} else {
+			cmd = command.Text
+		}
+		log.Infof(cmd)
+		fmt.Fprintf(e.errFile, "run : %s:%s\n", sv.Server, command.Id)
+		if _, err = client.Run(cmd, outFile, e.errFile); err != nil {
 			HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", sv.Server, command.Id))
 		}
 		log.Infof("run %s:%s,elapse %s", sv.Server, command.Id, time.Since(startTime))
