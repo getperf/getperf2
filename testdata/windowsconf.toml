@@ -34,11 +34,13 @@ insecure = true
 # [[commands]]
 #
 # id = "echo"   # unique key
-# level = 0      # command level [0-2]
+# type = "Cmd"  # Cmd : execute direct , Cmdlet : PowerShell -Command {...}
+# level = 0     # command level [0-2]
 # text = "echo 1"
 
 [[commands]]
 
 id = "echo"   # unique key
-level = 0      # command level [0-2]
+type = "Cmd"  # Cmd : execute direct , Cmdlet : PowerShell -Command {...}
+level = 0     # command level [0-2]
 text = "echo 1"

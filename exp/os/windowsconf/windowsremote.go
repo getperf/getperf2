@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/dpotapov/winrm-auth-ntlm"
@@ -18,6 +19,15 @@ import (
 // 	defaultTimeoutDuration = 300 * time.Second
 // 	timeoutKillAfter       = 1 * time.Second
 // )
+
+func convCommandLine(str, nlcode string) string {
+	return strings.NewReplacer(
+		"\r\n", nlcode,
+		"\r", nlcode,
+		"\n", nlcode,
+		"\t", nlcode,
+	).Replace(str)
+}
 
 func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Server) error {
 	log.Infof("server : %v", sv)
@@ -52,42 +62,20 @@ func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Serv
 			return HandleError(e.errFile, err, "prepare inventory log")
 		}
 		defer outFile.Close()
-		if _, err = client.Run(command.Text, outFile, e.errFile); err != nil {
+		var cmd string
+		if command.Type == "Cmdlet" {
+			cmd = winrm.Powershell(command.Text)
+		} else if command.Type == "Cmd" {
+			cmd = fmt.Sprintf("cmd.exe /c \"%s\"", command.Text)
+		} else {
+			cmd = command.Text
+		}
+		fmt.Fprintf(e.errFile, "run : %s:%s\n", sv.Server, command.Id)
+		if _, err = client.Run(cmd, outFile, e.errFile); err != nil {
 			HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", sv.Server, command.Id))
 		}
-		log.Infof("run %s:%s,elapse %s", sv.Server, command.Id, time.Since(startTime))
+		log.Debugf("run %s:%s,elapse %s", sv.Server, command.Id, time.Since(startTime))
 	}
 
-	// 	startTime := time.Now()
-	// 	outFile, err := env.OpenLog(command.Id)
-	// 	if err != nil {
-	// 		return errors.Wrap(err, "prepare windows inventory log")
-	// 	}
-	// 	defer outFile.Close()
-	// 	cmdContext := append(cmdPrefix, command.Text)
-	// 	cmd := exec.Command(cmdContext[0], cmdContext[1:]...)
-	// 	cmd.Stdout = outFile
-	// 	cmd.Stderr = outFile
-	// 	tio := &timeout.Timeout{
-	// 		Cmd:       cmd,
-	// 		Duration:  defaultTimeoutDuration,
-	// 		KillAfter: timeoutKillAfter,
-	// 	}
-	// 	if env.Timeout != 0 {
-	// 		tio.Duration = time.Duration(env.Timeout) * time.Second
-	// 	}
-	// 	exit, err := tio.RunContext(ctx)
-	// 	if err != nil {
-	// 		return errors.Wrap(err, "run windows inventory process")
-	// 	}
-	// 	// exit := <-ch
-	// 	msg := fmt.Sprintf("%s,RC:%d,Signal:%t,Elapse:%s",
-	// 		command.Text,
-	// 		exit.GetChildExitCode(), exit.Signaled, time.Since(startTime))
-	// 	if exit.GetChildExitCode() != 0 || exit.Signaled {
-	// 		log.Error(msg)
-	// 	}
-	// 	log.Infof("Complete command %s", msg)
-	// }
 	return nil
 }
