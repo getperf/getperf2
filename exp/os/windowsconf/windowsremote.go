@@ -64,50 +64,18 @@ func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Serv
 		defer outFile.Close()
 		var cmd string
 		if command.Type == "Cmdlet" {
-			cmd = fmt.Sprintf("PowerShell.exe -command \"& { %s }\"", convCommandLine(command.Text, " "))
+			cmd = winrm.Powershell(command.Text)
 		} else if command.Type == "Cmd" {
 			cmd = fmt.Sprintf("cmd.exe /c \"%s\"", command.Text)
 		} else {
 			cmd = command.Text
 		}
-		log.Infof(cmd)
 		fmt.Fprintf(e.errFile, "run : %s:%s\n", sv.Server, command.Id)
 		if _, err = client.Run(cmd, outFile, e.errFile); err != nil {
 			HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", sv.Server, command.Id))
 		}
-		log.Infof("run %s:%s,elapse %s", sv.Server, command.Id, time.Since(startTime))
+		log.Debugf("run %s:%s,elapse %s", sv.Server, command.Id, time.Since(startTime))
 	}
 
-	// 	startTime := time.Now()
-	// 	outFile, err := env.OpenLog(command.Id)
-	// 	if err != nil {
-	// 		return errors.Wrap(err, "prepare windows inventory log")
-	// 	}
-	// 	defer outFile.Close()
-	// 	cmdContext := append(cmdPrefix, command.Text)
-	// 	cmd := exec.Command(cmdContext[0], cmdContext[1:]...)
-	// 	cmd.Stdout = outFile
-	// 	cmd.Stderr = outFile
-	// 	tio := &timeout.Timeout{
-	// 		Cmd:       cmd,
-	// 		Duration:  defaultTimeoutDuration,
-	// 		KillAfter: timeoutKillAfter,
-	// 	}
-	// 	if env.Timeout != 0 {
-	// 		tio.Duration = time.Duration(env.Timeout) * time.Second
-	// 	}
-	// 	exit, err := tio.RunContext(ctx)
-	// 	if err != nil {
-	// 		return errors.Wrap(err, "run windows inventory process")
-	// 	}
-	// 	// exit := <-ch
-	// 	msg := fmt.Sprintf("%s,RC:%d,Signal:%t,Elapse:%s",
-	// 		command.Text,
-	// 		exit.GetChildExitCode(), exit.Signaled, time.Since(startTime))
-	// 	if exit.GetChildExitCode() != 0 || exit.Signaled {
-	// 		log.Error(msg)
-	// 	}
-	// 	log.Infof("Complete command %s", msg)
-	// }
 	return nil
 }

@@ -149,8 +149,6 @@ var commands = []*Command{
 		Get-WmiObject Win32_Product |
 		Select-Object Name, Vendor, Version |
 		Format-List
-		`),
-	NewCommand(0, "Cmdlet", "packages2", `
 		Get-ChildItem -Path(
 		'HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
 		'HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall') |
