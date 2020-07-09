@@ -1,15 +1,18 @@
 package gcmain
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/getperf/getperf2/agent"
 	"github.com/getperf/getperf2/cfg"
@@ -56,6 +59,7 @@ func (c *InventoryRetriever) Validate() error {
 }
 
 func CreateHttpClient(conf *cfg.RetrieveConfig) (*http.Client, error) {
+	SetHostIpLookupTransport()
 	client := &http.Client{}
 	log.Infof("client cert : %s", conf.ClientCertPath)
 	log.Infof("CA cert : %s", conf.CaPath)
@@ -148,6 +152,36 @@ func (c *InventoryRetriever) RetrieveDatastore(dsSet agent.DatastoreSet) error {
 	return nil
 }
 
+// TODO:
+// エージェントの接続先は、https://{ホスト名}:59443/ 形式で
+// ホスト名を指定する必要がある。ホスト名からIPの名前解決が必要
+// Transport.DialContext をカスタマイズする記事があり、動作検証中
+// 他にネームサービスにIPを登録する方法を調査中
+//
+// リファレンス：
+//
+// https://stackoverflow.com/questions/40624248/golang-force-http-request-to-specific-ip-similar-to-curl-resolve
+// You can provide a custom Transport.DialContext function.
+// https://golang.org/pkg/net/http/#Transport
+
+func SetHostIpLookupTransport() error {
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+		DualStack: true,
+	}
+	// or create your own transport, there's an example on godoc.
+	http.DefaultTransport.(*http.Transport).DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+		log.Info("address original =", addr)
+		if addr == "centos80:59443" {
+			addr = "192.168.0.5:59443"
+			log.Info("address modified =", addr)
+		}
+		return dialer.DialContext(ctx, network, addr)
+	}
+	return nil
+}
+
 // POST url+/downloadkeys/  して、host と stat_name のリストを取得
 // リストを順に実行
 // 	POST url+/download/{host}/{stat_name} をしてzip ファイル取得
@@ -161,10 +195,14 @@ func (c *InventoryRetriever) Run() error {
 	defer os.RemoveAll(workDir)
 	c.WorkDir = workDir
 
+	log.Info("TESTTESTTEST")
 	log.Info("set inventory datastore : ", c.Env.Datastore)
 	log.Info("set work dir : ", c.WorkDir)
 	log.Info("get inventory url : ", c.Env.Retrieve.FromUrl)
 
+	// if err := c.SetHostIpLookupTransport(); err != nil {
+	// 	return errors.Wrap(err, "prepare ip lookup")
+	// }
 	client, err := CreateHttpClient(c.Env.Retrieve)
 	if err != nil {
 		return errors.Wrap(err, "prepare http client")

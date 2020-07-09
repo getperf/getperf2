@@ -143,7 +143,7 @@ func (e *Linux) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Server
 		if err := RunCommand(outFile, e.errFile, client, command.Type, command.Text); err != nil {
 			HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", sv.Server, command.Id))
 		}
-		log.Infof("run %s:%s,elapse %s", sv.Server, command.Id, time.Since(startTime))
+		log.Debugf("run %s:%s,elapse %s", sv.Server, command.Id, time.Since(startTime))
 	}
 	return nil
 }

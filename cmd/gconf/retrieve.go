@@ -41,6 +41,11 @@ func init() {
 				Usage:       "client certiticated file; client.pem",
 				Destination: &env.Retrieve.ClientCertPath,
 			},
+			cli.IntFlag{
+				Name:        "timeout",
+				Usage:       "command timeout sec",
+				Destination: &env.Timeout,
+			},
 		},
 		Action: func(c *cli.Context) error {
 			return action(c, &retrieveCommand{Out: os.Stdout})
