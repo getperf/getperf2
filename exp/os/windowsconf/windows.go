@@ -44,18 +44,18 @@ func (e *Windows) writeScript(doc io.Writer, env *cfg.RunEnv) error {
 	if err != nil {
 		return errors.Wrap(err, "failed read template")
 	}
-	var filteredCommands []*Command
-	for _, command := range append(commands) {
-		if command.Level > env.Level {
+	var filteredMetrics []*Metric
+	for _, metric := range append(e.Metrics) {
+		if metric.Level > env.Level {
 			continue
 		}
-		if command.Id == "" {
+		if metric.Id == "" || metric.Text == "" || metric.Type != "Cmdlet" {
 			continue
 		}
-		log.Debugf("add test item %s:%d:%d", command.Id, command.Level, env.Level)
-		filteredCommands = append(filteredCommands, command)
+		log.Debugf("add test item %s:%d:%d", metric.Id, metric.Level, env.Level)
+		filteredMetrics = append(filteredMetrics, metric)
 	}
-	if err := tmpl.Execute(doc, filteredCommands); err != nil {
+	if err := tmpl.Execute(doc, filteredMetrics); err != nil {
 		return errors.Wrap(err, "failed generate script")
 	}
 	return nil
@@ -84,6 +84,12 @@ func (e *Windows) RunCommands(ctx context.Context, env *cfg.RunEnv) error {
 	}
 
 	for _, metric := range e.Metrics {
+		if metric.Level > env.Level {
+			continue
+		}
+		if metric.Id == "" || metric.Text == "" || metric.Type != "Cmd" {
+			continue
+		}
 		startTime := time.Now()
 		outFile, err := env.OpenLog(metric.Id)
 		if err != nil {

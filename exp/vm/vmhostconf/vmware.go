@@ -29,11 +29,13 @@ const (
 // VMWare Managed Object Description
 // Reference : http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.VirtualMachine.html
 
-var vmMetrics = []string{
-	"summary", "capability", "datastore",
-	"configManager", "hardware", "licensableResource",
-	"network",
-}
+var vmMetrics = []string{}
+
+// var vmMetrics = []string{
+// 	"summary", "capability", "datastore",
+// 	"configManager", "hardware", "licensableResource",
+// 	"network",
+// }
 
 func (e *VMWare) saveJson(ioErr io.Writer, outfile, query string) {
 	value := gjson.Get(e.json, query).String()
@@ -121,9 +123,20 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 	// Reference: http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.VirtualMachine.html
 	pc := property.DefaultCollector(session.Client)
 	var vms []mo.HostSystem
-	if len(e.Metrics) > 0 {
-		log.Info("add metrics : ", e.Metrics)
-		vmMetrics = append(vmMetrics, e.Metrics...)
+	// if len(e.Metrics) > 0 {
+	// 	log.Info("add metrics : ", e.Metrics)
+	// 	vmMetrics = append(vmMetrics, e.Metrics...)
+	// }
+	for _, metric := range e.Metrics {
+		if metric.Level > env.Level {
+			continue
+		}
+		objectId := metric.getObjectId()
+		if objectId == "" {
+			continue
+		}
+		log.Info("add metrics : ", objectId)
+		vmMetrics = append(vmMetrics, objectId)
 	}
 	err = pc.Retrieve(ctx, refs, vmMetrics, &vms)
 

@@ -7,6 +7,20 @@ import (
 
 const Version = "0.1.4"
 
+type Metric struct {
+	Id    string `toml:"id"`
+	Level int    `toml:"level"`
+	Text  string `toml:"text"`
+}
+
+func (metric *Metric) getObjectId() string {
+	if metric.Text == "" {
+		return metric.Id
+	} else {
+		return metric.Text
+	}
+}
+
 type VMWare struct {
 	Url      string `toml:"url"`
 	User     string `toml:"user"`
@@ -14,8 +28,8 @@ type VMWare struct {
 	Insecure bool   `toml:"insecure"`
 	Server   string `toml:"server"`
 
-	Metrics []string `toml:"metrics"`
-	Servers []string `toml:"servers"`
+	Servers []string  `toml:"servers"`
+	Metrics []*Metric `toml:"metrics"`
 
 	vmName    string
 	datastore string
@@ -44,19 +58,52 @@ server = "{{ .Server }}"
 
 # The following parameters are optional
 
-# Additional metrics list of VMWare Managed Object. 
-# 
-# Reference : https://code.vmware.com/apis/42/vsphere/doc/vim.HostSystem.html
-# 
-# example:
-#
-# metrics = ["config", "vm", "systemResources", "runtime"]
-
 # List of monitored servers other than the local server
 #
 # example:
 #
 # servers = ["host1", "host2"]
+
+# Additional metrics list of VMWare Managed Object. 
+# 
+# Notice: 
+#   The results of all added metrics are saved in the "all.json".
+#
+# Reference : https://code.vmware.com/apis/42/vsphere/doc/vim.HostSystem.html
+# 
+# [[metrics]]
+# 
+# id = "config"   # object key
+# level = 0       # command level [0-2]
+# text = "config" # If not defined, use id instead
+
+[[metrics]]
+
+id = "summary"
+
+[[metrics]]
+
+id = "capability"
+
+[[metrics]]
+
+id = "datastore"
+
+[[metrics]]
+
+id = "configManager"
+
+[[metrics]]
+
+id = "hardware"
+
+[[metrics]]
+
+id = "licensableResource"
+
+[[metrics]]
+
+id = "network"
 `
 
 func (e *VMWare) Label() string {
