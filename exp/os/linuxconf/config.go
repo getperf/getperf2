@@ -11,10 +11,10 @@ import (
 const Version = "0.1.4"
 
 type Linux struct {
-	Server    string     `toml:"server"`
-	LocalExec bool       `toml:"local_exec"`
-	Servers   []*Server  `toml:"servers"`
-	Commands  []*Command `toml:"commands"`
+	Server    string    `toml:"server"`
+	LocalExec bool      `toml:"local_exec"`
+	Servers   []*Server `toml:"servers"`
+	Metrics   []*Metric `toml:"metrics"`
 
 	Env          *cfg.RunEnv
 	errFile      io.Writer
@@ -59,11 +59,22 @@ local_exec = true
 # 
 # example:
 # 
-# [[commands]]
+# [[metrics]]
 # 
 # id = "oracle_module"   # unique key
 # level = 0      # command level [0-2]
 # text = "ls /home/oracle/"
+
+[[metrics]]
+
+id = "hostname"
+name = "ホスト名"
+category = "OSリリース"
+level = 0
+comment = "hostname -s　コマンドで、ホスト名を検索"
+text = '''
+hostname -s
+'''
 `
 
 func (e *Linux) Label() string {
