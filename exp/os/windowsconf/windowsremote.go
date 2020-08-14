@@ -30,7 +30,6 @@ func convCommandLine(str, nlcode string) string {
 }
 
 func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Server) error {
-	log.Infof("server : %v", sv)
 	e.datastore = filepath.Join(env.Datastore, sv.Server)
 	if err := os.MkdirAll(e.datastore, 0755); err != nil {
 		return HandleError(e.errFile, err, "create log directory")

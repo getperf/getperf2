@@ -127,23 +127,23 @@ func (e *Linux) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Server
 		return HandleError(e.errFile, err, "connect remote server")
 	}
 	defer client.Close()
-	for _, command := range commands {
-		if command.Level > env.Level {
+	for _, metric := range metrics {
+		if metric.Level > env.Level {
 			continue
 		}
-		if command.Id == "" {
+		if metric.Id == "" {
 			continue
 		}
 		startTime := time.Now()
-		outFile, err := env.OpenServerLog(sv.Server, command.Id)
+		outFile, err := env.OpenServerLog(sv.Server, metric.Id)
 		if err != nil {
 			return HandleError(e.errFile, err, "prepare inventory log")
 		}
 		defer outFile.Close()
-		if err := RunCommand(outFile, e.errFile, client, command.Type, command.Text); err != nil {
-			HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", sv.Server, command.Id))
+		if err := RunCommand(outFile, e.errFile, client, metric.Type, metric.Text); err != nil {
+			HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", sv.Server, metric.Id))
 		}
-		log.Debugf("run %s:%s,elapse %s", sv.Server, command.Id, time.Since(startTime))
+		log.Infof("run %s:%s,elapse %s", sv.Server, metric.Id, time.Since(startTime))
 	}
 	return nil
 }
