@@ -69,8 +69,8 @@ func TestRunLevelSetTest(t *testing.T) {
 	}
 }
 func TestWindowsToml(t *testing.T) {
-	commands2 := Commands{Commands: commands}
-	d, err := yaml.Marshal(commands2)
+	metrics2 := Metrics{Metrics: metrics}
+	d, err := yaml.Marshal(metrics2)
 	if err != nil {
 		t.Error(err)
 	}
@@ -84,7 +84,7 @@ func TestWindowsConfig(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	t.Log(windows.Commands[0])
+	t.Log(windows.Metrics[0])
 }
 
 func TestWindowsInventoryCode(t *testing.T) {

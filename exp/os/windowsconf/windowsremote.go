@@ -48,32 +48,32 @@ func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Serv
 		return HandleError(e.errFile, err, fmt.Sprintf("run %s", sv.Server))
 	}
 
-	for _, command := range append(commands, e.Commands...) {
-		if command.Level > env.Level {
+	for _, metric := range append(metrics, e.Metrics...) {
+		if metric.Level > env.Level {
 			continue
 		}
-		if command.Id == "" {
+		if metric.Id == "" || metric.Text == "" {
 			continue
 		}
 		startTime := time.Now()
-		outFile, err := env.OpenServerLog(sv.Server, command.Id)
+		outFile, err := env.OpenServerLog(sv.Server, metric.Id)
 		if err != nil {
 			return HandleError(e.errFile, err, "prepare inventory log")
 		}
 		defer outFile.Close()
 		var cmd string
-		if command.Type == "Cmdlet" {
-			cmd = winrm.Powershell(command.Text)
-		} else if command.Type == "Cmd" {
-			cmd = fmt.Sprintf("cmd.exe /c \"%s\"", command.Text)
+		if metric.Type == "Cmdlet" {
+			cmd = winrm.Powershell(metric.Text)
+		} else if metric.Type == "Cmd" {
+			cmd = fmt.Sprintf("cmd.exe /c \"%s\"", metric.Text)
 		} else {
-			cmd = command.Text
+			cmd = metric.Text
 		}
-		fmt.Fprintf(e.errFile, "run : %s:%s\n", sv.Server, command.Id)
+		fmt.Fprintf(e.errFile, "run : %s:%s\n", sv.Server, metric.Id)
 		if _, err = client.Run(cmd, outFile, e.errFile); err != nil {
-			HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", sv.Server, command.Id))
+			HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", sv.Server, metric.Id))
 		}
-		log.Debugf("run %s:%s,elapse %s", sv.Server, command.Id, time.Since(startTime))
+		log.Debugf("run %s:%s,elapse %s", sv.Server, metric.Id, time.Since(startTime))
 	}
 
 	return nil

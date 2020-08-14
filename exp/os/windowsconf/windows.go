@@ -83,14 +83,14 @@ func (e *Windows) RunCommands(ctx context.Context, env *cfg.RunEnv) error {
 		"/c",
 	}
 
-	for _, command := range e.Commands {
+	for _, metric := range e.Metrics {
 		startTime := time.Now()
-		outFile, err := env.OpenLog(command.Id)
+		outFile, err := env.OpenLog(metric.Id)
 		if err != nil {
 			return errors.Wrap(err, "prepare windows inventory log")
 		}
 		defer outFile.Close()
-		cmdContext := append(cmdPrefix, command.Text)
+		cmdContext := append(cmdPrefix, metric.Text)
 		cmd := exec.Command(cmdContext[0], cmdContext[1:]...)
 		cmd.Stdout = outFile
 		cmd.Stderr = outFile
@@ -108,7 +108,7 @@ func (e *Windows) RunCommands(ctx context.Context, env *cfg.RunEnv) error {
 		}
 		// exit := <-ch
 		msg := fmt.Sprintf("%s,RC:%d,Signal:%t,Elapse:%s",
-			command.Text,
+			metric.Text,
 			exit.GetChildExitCode(), exit.Signaled, time.Since(startTime))
 		if exit.GetChildExitCode() != 0 || exit.Signaled {
 			log.Error(msg)
@@ -234,10 +234,10 @@ func (e *Windows) Run(ctx context.Context, env *cfg.RunEnv) error {
 // 	defer errFile.Close()
 
 // 	log.Info(cmdPowershell)
-// 	cmd := exec.Command(cmdPowershell[0], cmdPowershell[1:]...)
+// 	cmd := exec.metric(cmdPowershell[0], cmdPowershell[1:]...)
 // 	stdout, err := cmd.StdoutPipe()
 // 	if err != nil {
-// 		return errors.Wrap(err, "create windows inventory command pipe")
+// 		return errors.Wrap(err, "create windows inventory Metric pipe")
 // 	}
 // 	startTime := time.Now()
 // 	testId := ""
