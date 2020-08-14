@@ -57,11 +57,11 @@ func (e *Linux) RunLocalServer(ctx context.Context, env *cfg.RunEnv, server stri
 	if err := RemoveAndCreateDir(e.datastore); err != nil {
 		return HandleError(e.errFile, err, "create log directory")
 	}
-	for _, metric := range metrics {
+	for _, metric := range e.Metrics {
 		if metric.Level > env.Level {
 			continue
 		}
-		if metric.Id == "" {
+		if metric.Id == "" || metric.Text == "" {
 			continue
 		}
 		startTime := time.Now()

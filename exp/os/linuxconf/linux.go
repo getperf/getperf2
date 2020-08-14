@@ -131,7 +131,7 @@ func (e *Linux) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Server
 		if metric.Level > env.Level {
 			continue
 		}
-		if metric.Id == "" {
+		if metric.Id == "" || metric.Text == "" {
 			continue
 		}
 		startTime := time.Now()

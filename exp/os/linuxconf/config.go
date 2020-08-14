@@ -68,12 +68,379 @@ local_exec = true
 [[metrics]]
 
 id = "hostname"
-name = "ホスト名"
-category = "OSリリース"
 level = 0
-comment = "hostname -s　コマンドで、ホスト名を検索"
 text = '''
 hostname -s
+'''
+
+[[metrics]]
+
+id = "hostname_fqdn"
+level = 0
+text = '''
+hostname --fqdn 2>/dev/null
+if [ $? != 0 ]; then
+    echo 'Not Found'
+fi
+'''
+
+[[metrics]]
+
+id = "uname"
+level = 0
+text = '''
+uname -a
+'''
+
+[[metrics]]
+
+id = "lsb"
+level = 0
+text = '''
+cat /etc/*-release
+'''
+
+[[metrics]]
+
+id = "virturization"
+level = 1
+text = '''
+cat /proc/cpuinfo
+'''
+
+[[metrics]]
+
+id = "sestatus"
+level = 1
+text = '''
+/usr/sbin/sestatus
+'''
+
+[[metrics]]
+
+id = "mount_iso"
+level = 1
+text = '''
+mount
+'''
+
+[[metrics]]
+
+id = "proxy_global"
+level = 1
+text = '''
+grep proxy /etc/yum.conf
+if [ \$? != 0 ]; then
+    echo 'Not found'
+fi
+'''
+
+[[metrics]]
+
+id = "crash_size"
+level = 1
+text = '''
+cat /sys/kernel/kexec_crash_size 2>/dev/null
+if [ $? != 0 ]; then
+    echo 'Unkown crash_size. kdump:'
+    cat /sys/kernel/kexec_crash_loaded
+fi
+'''
+
+[[metrics]]
+
+id = "kdump_path"
+level = 1
+text = '''
+egrep -e '^(path|core_collector)' /etc/kdump.conf 2>/dev/null
+if [ $? != 0 ]; then
+    echo 'Not found'
+fi
+'''
+
+[[metrics]]
+
+id = "runlevel"
+level = 1
+text = '''
+if [ -f /usr/bin/systemctl ]; then
+    /usr/bin/systemctl get-default
+else
+    grep :initdefault /etc/inittab
+fi
+'''
+
+[[metrics]]
+
+id = "resolve_conf"
+level = 1
+text = '''
+grep nameserver /etc/resolv.conf 2>/dev/null
+if [ $? != 0 ]; then
+    echo 'Not Found'
+fi
+'''
+
+[[metrics]]
+
+id = "keyboard"
+level = 1
+text = '''
+if [ -f /etc/sysconfig/keyboard ]; then
+    cat /etc/sysconfig/keyboard
+elif [ -f /etc/vconsole.conf ]; then
+    cat /etc/vconsole.conf
+fi
+'''
+
+[[metrics]]
+
+id = "language"
+level = 1
+text = '''
+cat /proc/cmdline
+'''
+
+[[metrics]]
+
+id = "grub"
+level = 1
+text = '''
+grep GRUB_CMDLINE_LINUX /etc/default/grub 2>/dev/null
+if [ $? != 0 ]; then
+    echo 'Not found'
+fi
+'''
+
+[[metrics]]
+
+id = "timezone"
+level = 1
+text = '''
+if [ -x /bin/timedatectl ]; then
+    /bin/timedatectl
+elif [ -f /etc/sysconfig/clock ]; then
+    cat /etc/sysconfig/clock
+fi
+'''
+
+[[metrics]]
+
+id = "ntp_slew"
+level = 1
+text = '''
+grep -i options /etc/sysconfig/ntpd 2>/dev/null
+if [ $? != 0 ]; then
+    echo 'Not found'
+fi
+'''
+
+[[metrics]]
+
+id = "ntp"
+level = 1
+text = '''
+egrep -e '^server' /etc/ntp.conf 2>/dev/null
+if [ $? != 0 ]; then
+    echo 'Not found'
+fi
+'''
+
+[[metrics]]
+
+id = "snmp_trap"
+level = 1
+text = '''
+cat /etc/snmp/snmpd.conf
+'''
+
+[[metrics]]
+
+id = "vmware_scsi_timeout"
+level = 1
+text = '''
+cat /etc/udev/rules.d/99-vmware-scsi-udev.rules 2>/dev/null
+if [ $? != 0 ]; then
+    echo 'Not found'
+fi
+'''
+
+[[metrics]]
+
+id = "vmwaretool_timesync"
+level = 1
+text = '''
+LANG=c /usr/bin/vmware-toolbox-cmd timesync status 2>/dev/null
+if [ $? == 127 ]; then
+    echo 'Not found'
+fi
+'''
+
+[[metrics]]
+
+id = "cpu"
+level = 0
+text = '''
+cat /proc/cpuinfo
+'''
+
+[[metrics]]
+
+id = "meminfo"
+level = 0
+text = '''
+cat /proc/meminfo
+'''
+
+[[metrics]]
+
+id = "net_onboot"
+level = 0
+text = '''
+cd /etc/sysconfig/network-scripts/
+grep ONBOOT ifcfg-*
+'''
+
+[[metrics]]
+
+id = "net_route"
+level = 0
+text = '''
+/sbin/ip route
+'''
+
+[[metrics]]
+
+id = "net_bond"
+level = 0
+text = '''
+cd /etc/sysconfig/network-scripts/
+cat *-bond* 2>/dev/null
+if [ $? != 0 ]; then
+    echo 'Not found'
+fi
+'''
+
+[[metrics]]
+
+id = "network"
+level = 0
+text = '''
+/sbin/ip addr
+'''
+
+[[metrics]]
+
+id = "block_device"
+level = 0
+text = '''
+egrep -H '.*' /sys/block/*/size
+egrep -H '.*' /sys/block/*/removable
+egrep -H '.*' /sys/block/*/device/model
+egrep -H '.*' /sys/block/*/device/rev
+egrep -H '.*' /sys/block/*/device/state
+egrep -H '.*' /sys/block/*/device/timeout
+egrep -H '.*' /sys/block/*/device/vendor
+egrep -H '.*' /sys/block/*/device/queue_depth
+'''
+
+[[metrics]]
+
+id = "mdadb"
+level = 0
+text = '''
+cat /proc/mdstat
+'''
+
+[[metrics]]
+
+id = "fstab"
+level = 0
+text = '''
+cat /etc/fstab
+'''
+
+[[metrics]]
+
+id = "lvm"
+level = 0
+text = '''
+mount
+'''
+
+[[metrics]]
+
+id = "filesystem"
+level = 0
+text = '''
+if [ -x /bin/lsblk ]; then
+    /bin/lsblk -i
+else
+    /bin/df -k
+fi
+'''
+
+[[metrics]]
+
+id = "filesystem_df_ip"
+level = 0
+text = '''
+df -iP
+'''
+
+[[metrics]]
+
+id = "user"
+level = 1
+text = '''
+cat /etc/passwd
+'''
+
+[[metrics]]
+
+id = "service"
+level = 1
+text = '''
+if [ -f /usr/bin/systemctl ]; then
+    /usr/bin/systemctl list-units --type service --all
+elif [ -f /sbin/chkconfig ]; then
+    /sbin/chkconfig --list
+fi
+'''
+
+[[metrics]]
+
+id = "packages"
+level = 1
+text = '''
+rpm -qa --qf "%{NAME}\t%|EPOCH?{%{EPOCH}}:{0}|\t%{VERSION}\t%{RELEASE}\t%{INSTALLTIME}\t%{ARCH}\n"
+'''
+
+[[metrics]]
+
+id = "error_messages"
+level = 2
+text = '''
+egrep -i '(error|warning|failed)' /var/log/messages | head -100
+'''
+
+[[metrics]]
+
+id = "oracle_module"
+level = 2
+text = '''
+sudo -A ls /root/package/*
+'''
+
+[[metrics]]
+
+id = "oracle"
+level = 2
+text = '''
+ls -d /opt/oracle/app/product/*/* /*/app/oracle/product/*/* 2>/dev/null
+if [ \$? != 0 ]; then
+    echo 'Not found'
+fi
 '''
 `
 
