@@ -49,7 +49,7 @@ func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Serv
 	}
 
 	for _, metric := range append(metrics, e.Metrics...) {
-		if metric.Level > env.Level {
+		if metric.Level == -1 || metric.Level > env.Level {
 			continue
 		}
 		if metric.Id == "" || metric.Text == "" {

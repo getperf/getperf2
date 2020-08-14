@@ -141,7 +141,7 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 	// 	vmMetrics = append(vmMetrics, e.Metrics...)
 	// }
 	for _, metric := range e.Metrics {
-		if metric.Level > env.Level {
+		if metric.Level == -1 || metric.Level > env.Level {
 			continue
 		}
 		objectId := metric.getObjectId()

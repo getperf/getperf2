@@ -128,7 +128,7 @@ func (e *Linux) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Server
 	}
 	defer client.Close()
 	for _, metric := range metrics {
-		if metric.Level > env.Level {
+		if metric.Level == -1 || metric.Level > env.Level {
 			continue
 		}
 		if metric.Id == "" || metric.Text == "" {

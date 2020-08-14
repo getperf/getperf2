@@ -58,7 +58,7 @@ func (e *Linux) RunLocalServer(ctx context.Context, env *cfg.RunEnv, server stri
 		return HandleError(e.errFile, err, "create log directory")
 	}
 	for _, metric := range e.Metrics {
-		if metric.Level > env.Level {
+		if metric.Level == -1 || metric.Level > env.Level {
 			continue
 		}
 		if metric.Id == "" || metric.Text == "" {

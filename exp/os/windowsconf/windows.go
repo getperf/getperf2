@@ -46,7 +46,7 @@ func (e *Windows) writeScript(doc io.Writer, env *cfg.RunEnv) error {
 	}
 	var filteredMetrics []*Metric
 	for _, metric := range append(e.Metrics) {
-		if metric.Level > env.Level {
+		if metric.Level == -1 || metric.Level > env.Level {
 			continue
 		}
 		if metric.Id == "" || metric.Text == "" || metric.Type != "Cmdlet" {
@@ -84,7 +84,7 @@ func (e *Windows) RunCommands(ctx context.Context, env *cfg.RunEnv) error {
 	}
 
 	for _, metric := range e.Metrics {
-		if metric.Level > env.Level {
+		if metric.Level == -1 || metric.Level > env.Level {
 			continue
 		}
 		if metric.Id == "" || metric.Text == "" || metric.Type != "Cmd" {
