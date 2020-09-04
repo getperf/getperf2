@@ -135,7 +135,10 @@ func CreateAndOpenFile(filePath string) (*os.File, error) {
 // エラーとして返します
 func HandleError(w io.Writer, inErr error, message string) error {
 	if inErr != nil {
-		_, err := fmt.Fprintf(w, "%s : %s\n", message, inErr)
+		msg := fmt.Sprintf("%s : %s\n", message, inErr)
+		// _, err := fmt.Fprintf(w, "%s : %s\n", message, inErr)
+		// fmt.Fprint(os.Stderr, msg)
+		_, err := fmt.Fprint(w, msg)
 		if err != nil {
 			log.Errorf("write log error : %s", err)
 		}
@@ -143,6 +146,16 @@ func HandleError(w io.Writer, inErr error, message string) error {
 	} else {
 		return nil
 	}
+}
+
+// HandleError はエラーがある場合に、メッセージを付加したエラーをログ出力し、
+// エラーとして返します
+func HandleErrorWithAlert(w io.Writer, inErr error, message string) error {
+	err := HandleError(w, inErr, message)
+	if err != nil {
+		log.Error(err)
+	}
+	return err
 }
 
 // CheckDirectoryIsNull は中身が空のディレクトリかチェックします
@@ -227,6 +240,26 @@ func GetTimeString(dateFormat DateFormat, t time.Time) string {
 // 取り除きます(tmp/log/data)
 func TrimPathSeparator(path string) string {
 	return strings.Trim(path, string(os.PathSeparator))
+}
+
+// ; Log level. None 0, FATAL 1, CRIT 2, ERR 3, WARN 4, NOTICE 5, INFO 6, DBG 7
+// LOG_LEVEL = 5
+func SetLogLevel(level int) error {
+	switch level {
+	case 0, 1:
+		log.SetLevel(log.FatalLevel)
+	case 2, 3:
+		log.SetLevel(log.ErrorLevel)
+	case 4, 5:
+		log.SetLevel(log.WarnLevel)
+	case 6:
+		log.SetLevel(log.InfoLevel)
+	case 7:
+		log.SetLevel(log.DebugLevel)
+	default:
+		return fmt.Errorf("unkown log level %d", level)
+	}
+	return nil
 }
 
 // // CheckDiskFree は指定したディレクトリのディスク使用量[%]を取得します。

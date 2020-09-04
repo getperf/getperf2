@@ -83,6 +83,10 @@ id = "summary"
 
 [[metrics]]
 
+id = "config"
+
+[[metrics]]
+
 id = "capability"
 
 [[metrics]]

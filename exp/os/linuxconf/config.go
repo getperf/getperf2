@@ -102,6 +102,14 @@ cat /etc/*-release
 
 [[metrics]]
 
+id = "fips"
+level = 1
+text = '''
+cat /proc/sys/crypto/fips_enabled
+'''
+
+[[metrics]]
+
 id = "virturization"
 level = 1
 text = '''
@@ -137,6 +145,18 @@ fi
 
 [[metrics]]
 
+id = "kdump"
+level = 1
+text = '''
+if [ -f /usr/bin/systemctl ]; then
+    /usr/bin/systemctl status kdump
+else
+    /sbin/chkconfig --list|grep kdump
+fi
+'''
+
+[[metrics]]
+
 id = "crash_size"
 level = 1
 text = '''
@@ -155,6 +175,18 @@ text = '''
 egrep -e '^(path|core_collector)' /etc/kdump.conf 2>/dev/null
 if [ $? != 0 ]; then
     echo 'Not found'
+fi
+'''
+
+[[metrics]]
+
+id = "iptables"
+level = 1
+text = '''
+if [ -f /usr/bin/systemctl ]; then
+    /usr/bin/systemctl status iptables firewalld
+else
+    /sbin/chkconfig --list|grep iptables
 fi
 '''
 
@@ -398,6 +430,15 @@ cat /etc/passwd
 
 [[metrics]]
 
+id = "group"
+level = 1
+deviceFlag = true
+text = '''
+cat /etc/group
+'''
+
+[[metrics]]
+
 id = "service"
 level = 1
 text = '''
@@ -414,6 +455,30 @@ id = "packages"
 level = 1
 text = '''
 rpm -qa --qf "%{NAME}\t%|EPOCH?{%{EPOCH}}:{0}|\t%{VERSION}\t%{RELEASE}\t%{INSTALLTIME}\t%{ARCH}\n"
+'''
+
+[[metrics]]
+
+id = "cron"
+level = 1
+text = '''
+sudo -A sh -c "cd /var/spool/cron/; egrep -H '.*' *"
+'''
+
+[[metrics]]
+
+id = "yum"
+level = 1
+text = '''
+egrep -e '\[|enabled' /etc/yum.repos.d/*.repo
+'''
+
+[[metrics]]
+
+id = "resource_limits"
+level = 1
+text = '''
+egrep -v '^#' /etc/security/limits.d/*
 '''
 
 [[metrics]]

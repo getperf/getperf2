@@ -132,6 +132,7 @@ id = "storage"
 [[metrics]]
 
 id = "runtime"
+
 `
 
 func (e *VMWare) Label() string {

@@ -12,6 +12,7 @@ import (
 
 	"github.com/getperf/getperf2/cfg"
 	. "github.com/getperf/getperf2/common"
+	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
@@ -49,10 +50,19 @@ func (e *VMWare) saveJson(ioErr io.Writer, outfile, query string) {
 	}
 }
 
-func (e *VMWare) retrieveInventory(ioErr io.Writer, vm string) {
-	e.saveJson(ioErr, "hardware", "Summary.Hardware")
-	e.saveJson(ioErr, "config", "Summary.Config")
-	e.saveJson(ioErr, "product", "Summary.Config.Product")
+func (e *VMWare) retrieveInventory(env *cfg.RunEnv, ioErr io.Writer, vm string) {
+	for _, metric := range e.Metrics {
+		objectId := metric.getObjectId()
+		if metric.Level == -1 || metric.Level > env.Level || objectId == "" {
+			continue
+		}
+		query := strcase.ToCamel(objectId)
+		e.saveJson(ioErr, objectId, query)
+	}
+	// Default extraction
+	e.saveJson(ioErr, "base_hardware", "Summary.Hardware")
+	e.saveJson(ioErr, "base_config", "Summary.Config")
+	e.saveJson(ioErr, "base_product", "Summary.Config.Product")
 }
 
 // func HandleError(w io.Writer, inErr error, message string) error {
@@ -164,7 +174,7 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 			return HandleError(errFile, err, "write host all info json")
 		}
 		e.json = string(bytes)
-		e.retrieveInventory(errFile, e.vmName)
+		e.retrieveInventory(env, errFile, e.vmName)
 	}
 	log.Infof("retrieve host : %d, elapse %s", len(vms), time.Since(startTime))
 

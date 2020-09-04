@@ -23,6 +23,8 @@ var (
 	timeoutKillAfter       = 1 * time.Second
 )
 
+var powershellCmd = `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`
+
 var powershellCode = `# Windows invetory collecting script
 
 Param(
@@ -139,6 +141,15 @@ func (e *Windows) RunLocalServer(ctx context.Context, env *cfg.RunEnv) error {
 		return errors.Wrap(err, "prepare windows inventory script")
 	}
 	cmdPowershell := []string{
+		// Get-NetConnectionProfileなど、一部コマンドレットの実行で、
+		// "プロバイダーによる読み込みエラーです" エラーが発生。
+		// 以下の記事を参照し、絶対パスで 64bit 版 PowerShell を指定して
+		// も同様のエラーが発生する。原因、調査中。
+		// Get-WindowsFeature コマンドレットでも類似の問題発生。
+
+		// https://stackoverflow.com/questions/28156066/how-to-resolve-get-netconnectionprofile-provider-load-failure-on-x86-powershel
+
+		// powershellCmd,
 		"powershell",
 		e.ScriptPath,
 		env.Datastore,
@@ -193,14 +204,14 @@ func (e *Windows) Run(ctx context.Context, env *cfg.RunEnv) error {
 
 	if e.LocalExec == true {
 		log.Info("collect local server : ", e.LocalExec)
-		if err := e.RunLocalServer(ctx, env); err != nil {
+		if err = e.RunLocalServer(ctx, env); err != nil {
 			msg := fmt.Sprintf("run local server '%s'", e.Server)
 			HandleError(e.errFile, err, msg)
 		}
 	}
 	for _, sv := range e.Servers {
 		log.Info("collect remote server : ", sv.Server)
-		if err := e.RunRemoteServer(ctx, env, sv); err != nil {
+		if err = e.RunRemoteServer(ctx, env, sv); err != nil {
 			msg := fmt.Sprintf("run remote server '%s'", sv.Server)
 			HandleError(e.errFile, err, msg)
 		}
@@ -208,7 +219,7 @@ func (e *Windows) Run(ctx context.Context, env *cfg.RunEnv) error {
 	msg := fmt.Sprintf("Elapse %s", time.Since(startTime))
 	log.Infof("Complete Windows inventory collection %s", msg)
 
-	return nil
+	return err
 }
 
 // func (e *Windows) Run(env *cfg.RunEnv) error {

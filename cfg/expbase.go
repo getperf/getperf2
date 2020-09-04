@@ -29,6 +29,6 @@ func (b *ExportBase) Check() error {
 		}
 		b.Home = home
 	}
-	log.Info("set base home : ", b.Home)
+	log.Debug("set base home : ", b.Home)
 	return nil
 }

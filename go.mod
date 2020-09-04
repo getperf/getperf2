@@ -11,6 +11,7 @@ require (
 	github.com/google/gops v0.3.10
 	github.com/gorilla/mux v1.7.4
 	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
+	github.com/iancoleman/strcase v0.1.1
 	github.com/kardianos/minwinsvc v1.0.0
 	github.com/lestrrat-go/file-rotatelogs v2.3.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.1 // indirect

@@ -12,6 +12,7 @@ import (
 
 	"github.com/getperf/getperf2/cfg"
 	. "github.com/getperf/getperf2/common"
+	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
@@ -50,22 +51,31 @@ func (e *VMWare) saveJson(ioErr io.Writer, outfile, query string) {
 	}
 }
 
-func (e *VMWare) retrieveInventory(ioErr io.Writer, vm string) {
-	e.saveJson(ioErr, "hardware",
+func (e *VMWare) retrieveInventory(env *cfg.RunEnv, ioErr io.Writer, vm string) {
+	for _, metric := range e.Metrics {
+		objectId := metric.getObjectId()
+		if metric.Level == -1 || metric.Level > env.Level || objectId == "" {
+			continue
+		}
+		query := strcase.ToCamel(objectId)
+		e.saveJson(ioErr, objectId, query)
+	}
+	// Default extraction
+	e.saveJson(ioErr, "base_hardware",
 		"Config.Hardware")
-	e.saveJson(ioErr, "cpu_memory_resource",
+	e.saveJson(ioErr, "base_cpu_memory_resource",
 		"{ResourceConfig.CpuAllocation,ResourceConfig.MemoryAllocation}")
-	e.saveJson(ioErr, "datastore",
+	e.saveJson(ioErr, "base_datastore",
 		"Storage.PerDatastoreUsage")
-	e.saveJson(ioErr, "disk",
+	e.saveJson(ioErr, "base_disk",
 		"Guest.Disk")
-	e.saveJson(ioErr, "boot",
+	e.saveJson(ioErr, "base_boot",
 		"Config.BootOptions")
-	e.saveJson(ioErr, "ipstack",
+	e.saveJson(ioErr, "base_ipstack",
 		"Guest.IpStack")
-	e.saveJson(ioErr, "net",
+	e.saveJson(ioErr, "base_net",
 		"Guest.Net")
-	e.saveJson(ioErr, "ext_config",
+	e.saveJson(ioErr, "base_ext_config",
 		"Config.ExtraConfig")
 }
 
@@ -177,7 +187,7 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 			return HandleError(errFile, err, "write vm all info json")
 		}
 		e.json = string(bytes)
-		e.retrieveInventory(errFile, e.vmName)
+		e.retrieveInventory(env, errFile, e.vmName)
 	}
 	log.Infof("retrieve vm : %d, elapse %s", len(vms), time.Since(startTime))
 

@@ -127,7 +127,8 @@ func (e *Linux) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Server
 		return HandleError(e.errFile, err, "connect remote server")
 	}
 	defer client.Close()
-	for _, metric := range metrics {
+	fmt.Println(metrics)
+	for _, metric := range e.Metrics {
 		if metric.Level == -1 || metric.Level > env.Level {
 			continue
 		}
@@ -160,17 +161,19 @@ func (e *Linux) Run(ctx context.Context, env *cfg.RunEnv) error {
 
 	if e.LocalExec == true {
 		log.Info("collect local server : ", e.LocalExec)
-		if err := e.RunLocalServer(ctx, env, e.Server); err != nil {
-			HandleError(e.errFile, err, fmt.Sprintf("run local server '%s'", e.Server))
+		if err = e.RunLocalServer(ctx, env, e.Server); err != nil {
+			msg := fmt.Sprintf("run local server '%s'", e.Server)
+			HandleErrorWithAlert(e.errFile, err, msg)
 		}
 	}
 	for _, sv := range e.Servers {
-		if err := e.RunRemoteServer(ctx, env, sv); err != nil {
-			HandleError(e.errFile, err, fmt.Sprintf("run remote server '%s'", sv.Server))
+		if err = e.RunRemoteServer(ctx, env, sv); err != nil {
+			msg := fmt.Sprintf("run remote server '%s'", sv.Server)
+			HandleErrorWithAlert(e.errFile, err, msg)
 		}
 	}
 	msg := fmt.Sprintf("Elapse %s", time.Since(startTime))
 	log.Infof("Complete Linux inventory collection %s", msg)
 
-	return nil
+	return err
 }

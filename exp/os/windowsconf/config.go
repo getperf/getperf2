@@ -264,7 +264,7 @@ id = "network_profile"
 level = 2
 type = "Cmdlet"
 text = '''
-Get-NetConnectionProfile
+Get-NetConnectionProfile | FL
 '''
 
 [[metrics]]
@@ -335,11 +335,20 @@ $result | Format-List
 
 [[metrics]]
 
+id = "whoami"
+level = 0
+type = "Cmd"
+text = '''
+whoami /user
+'''
+
+[[metrics]]
+
 id = "etc_hosts"
 level = 1
 type = "Cmdlet"
 text = '''
-Get-Content '$($env:windir)\system32\Drivers\etc\hosts'
+Get-Content 'C:\Windows\system32\Drivers\etc\hosts'
 '''
 
 [[metrics]]
@@ -349,6 +358,15 @@ level = 0
 type = "Cmd"
 text = '''
 wmic qfe
+'''
+
+[[metrics]]
+
+id = "net_accounts"
+level = 2
+type = "Cmd"
+text = '''
+net accounts
 '''
 
 [[metrics]]

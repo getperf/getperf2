@@ -25,6 +25,7 @@ type RunEnv struct {
 	Datastore string
 	LocalExec bool
 	Timeout   int
+	LogLevel  int
 	Retrieve  *RetrieveConfig
 	Filter    *FilterConfig
 	Status    RunStatus

@@ -42,6 +42,12 @@ func init() {
 				Usage:       "command timeout sec",
 				Destination: &env.Timeout,
 			},
+			cli.IntFlag{
+				Name:        "log-level",
+				Usage:       "log level[0-7]",
+				Value:       6,
+				Destination: &env.LogLevel,
+			},
 			&cli.StringFlag{
 				Name:        "keyword-server",
 				Usage:       "filtering keyword of target servers",
