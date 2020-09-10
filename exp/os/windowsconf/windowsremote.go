@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dpotapov/winrm-auth-ntlm"
+	// "github.com/dpotapov/winrm-auth-ntlm"
 	"github.com/getperf/getperf2/cfg"
 	. "github.com/getperf/getperf2/common"
 	"github.com/masterzen/winrm"
@@ -36,14 +36,15 @@ func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Serv
 	}
 
 	endpoint := winrm.NewEndpoint(sv.Url, 5985, false, false, nil, nil, nil, 0)
-	winrm.DefaultParameters.TransportDecorator = func() winrm.Transporter {
-		return &winrmntlm.Transport{
-			Username: sv.User,
-			Password: sv.Password,
-		}
-	}
-	// Note, username/password pair in the NewClientWithParameters call is ignored
-	client, err := winrm.NewClientWithParameters(endpoint, "", "", winrm.DefaultParameters)
+	// winrm.DefaultParameters.TransportDecorator = func() winrm.Transporter {
+	// 	return &winrmntlm.Transport{
+	// 		Username: sv.User,
+	// 		Password: sv.Password,
+	// 	}
+	// }
+	// // Note, username/password pair in the NewClientWithParameters call is ignored
+	// client, err := winrm.NewClientWithParameters(endpoint, "", "", winrm.DefaultParameters)
+	client, err := winrm.NewClient(endpoint, sv.User, sv.Password)
 	if err != nil {
 		return HandleError(e.errFile, err, fmt.Sprintf("run %s", sv.Server))
 	}
