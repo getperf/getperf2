@@ -249,7 +249,7 @@ Format-List
 [[metrics]]
 
 id = "network"
-level = 2
+level = 0
 type = "Cmdlet"
 text = '''
 Get-WmiObject Win32_NetworkAdapterConfiguration |

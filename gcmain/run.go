@@ -11,7 +11,6 @@ import (
 	"github.com/getperf/getperf2/exp"
 	_ "github.com/getperf/getperf2/exp/all"
 
-	// . "github.com/getperf/getperf2/common"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )

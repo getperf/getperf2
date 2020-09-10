@@ -16,9 +16,9 @@ import (
 
 	"github.com/getperf/getperf2/agent"
 	"github.com/getperf/getperf2/cfg"
+	"github.com/getperf/getperf2/common"
 	_ "github.com/getperf/getperf2/exp/all"
 
-	// . "github.com/getperf/getperf2/common"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -194,8 +194,9 @@ func (c *InventoryRetriever) Run() error {
 	}
 	defer os.RemoveAll(workDir)
 	c.WorkDir = workDir
-
-	log.Info("TESTTESTTEST")
+	if err := common.SetLogLevel(c.Env.LogLevel); err != nil {
+		return fmt.Errorf("set log level : %s.", err)
+	}
 	log.Info("set inventory datastore : ", c.Env.Datastore)
 	log.Info("set work dir : ", c.WorkDir)
 	log.Info("get inventory url : ", c.Env.Retrieve.FromUrl)

@@ -46,6 +46,12 @@ func init() {
 				Usage:       "command timeout sec",
 				Destination: &env.Timeout,
 			},
+			cli.IntFlag{
+				Name:        "log-level",
+				Usage:       "log level[0-7]",
+				Value:       6,
+				Destination: &env.LogLevel,
+			},
 		},
 		Action: func(c *cli.Context) error {
 			return action(c, &retrieveCommand{Out: os.Stdout})

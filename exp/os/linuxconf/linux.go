@@ -88,6 +88,15 @@ func sshConnect(url, user, pass, keypath string) (*ssh.Client, error) {
 	return conn, nil
 }
 
+// 改行コードを統一する。
+func convNewline(str, nlcode string) string {
+	return strings.NewReplacer(
+		"\r\n", nlcode,
+		"\r", nlcode,
+		"\n", nlcode,
+	).Replace(str)
+}
+
 func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, command string) error {
 	session, err := conn.NewSession()
 	if err != nil {
@@ -97,12 +106,17 @@ func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, c
 
 	session.Stdout = stdOut
 	session.Stderr = stdErr
+	// 「予期しないファイル終了（EOF）」エラー回避のため、
+	// 改行コードは LF に統一する
+	command = convNewline(command, "\n")
+	fmt.Printf("cmd:%v,type:%v\n", command, execType)
 	if execType == "Cmd" {
 		err = session.Run(command)
 		if err != nil {
 			return errors.Wrap(err, "run command")
 		}
 	} else if execType == "Script" {
+		fmt.Printf("script:|%v|\n", command)
 		session.Stdin = bytes.NewBufferString(command + "\n")
 		if err := session.Shell(); err != nil {
 			return errors.Wrap(err, "run shell")
@@ -127,7 +141,6 @@ func (e *Linux) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Server
 		return HandleError(e.errFile, err, "connect remote server")
 	}
 	defer client.Close()
-	fmt.Println(metrics)
 	for _, metric := range e.Metrics {
 		if metric.Level == -1 || metric.Level > env.Level {
 			continue
