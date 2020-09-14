@@ -3,6 +3,8 @@ Changes for 1.13.0 (2020-8-31)
 * ログ出力レベル指定オプション追加
 
 Bug fix:
+
+* WinRM NTLM認証ライブラリの接続エラー問題調査
 * Linux, Windows で接続エラー発生時に終了コードが正常終了;0になる問題対処
 * Windows ローカル環境で、Get-NetConnectionProfileなどの一部コマンドレットで実行エラー発生
 
