@@ -45,7 +45,7 @@ func (e *VMWare) saveJson(ioErr io.Writer, outfile, query string) {
 		fmt.Fprintf(ioErr, "not found json query[%s:%s] : '%s'\n", e.vmName, outfile, query)
 		return
 	}
-	outPath := filepath.Join(e.datastore, outfile+".json")
+	outPath := filepath.Join(e.datastore, outfile)
 	if err := ioutil.WriteFile(outPath, []byte(value), 0666); err != nil {
 		fmt.Fprintf(ioErr, err.Error())
 	}
@@ -182,7 +182,7 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 		if err := RemoveAndCreateDir(e.datastore); err != nil {
 			return HandleError(errFile, err, "create log directory")
 		}
-		alldataPath := filepath.Join(e.datastore, "all.json")
+		alldataPath := filepath.Join(e.datastore, "all")
 		if err := ioutil.WriteFile(alldataPath, bytes, 0666); err != nil {
 			return HandleError(errFile, err, "write vm all info json")
 		}

@@ -1,34 +1,34 @@
 package linuxconf
 
 import (
-	"io"
+    "io"
 
-	"github.com/getperf/getperf2/cfg"
-	. "github.com/getperf/getperf2/common"
-	. "github.com/getperf/getperf2/exp"
+    "github.com/getperf/getperf2/cfg"
+    . "github.com/getperf/getperf2/common"
+    . "github.com/getperf/getperf2/exp"
 )
 
 const Version = "0.1.4"
 
 type Linux struct {
-	Server    string    `toml:"server"`
-	LocalExec bool      `toml:"local_exec"`
-	Servers   []*Server `toml:"servers"`
-	Metrics   []*Metric `toml:"metrics"`
+    Server    string    `toml:"server"`
+    LocalExec bool      `toml:"local_exec"`
+    Servers   []*Server `toml:"servers"`
+    Metrics   []*Metric `toml:"metrics"`
 
-	Env          *cfg.RunEnv
-	errFile      io.Writer
-	remoteServer string
-	datastore    string
+    Env          *cfg.RunEnv
+    errFile      io.Writer
+    remoteServer string
+    datastore    string
 }
 
 type Server struct {
-	Server     string `toml:"server"`
-	Url        string `toml:"url"`
-	User       string `toml:"user"`
-	Password   string `toml:"password"`
-	SshKeyPath string `toml:"ssh_key"`
-	Insecure   bool   `toml:"insecure"`
+    Server     string `toml:"server"`
+    Url        string `toml:"url"`
+    User       string `toml:"user"`
+    Password   string `toml:"password"`
+    SshKeyPath string `toml:"ssh_key"`
+    Insecure   bool   `toml:"insecure"`
 }
 
 var sampleTemplateConfig = `
@@ -355,6 +355,14 @@ fi
 
 [[metrics]]
 
+id = "tcp_keepalive"
+level = 0
+text = '''
+cat /proc/sys/net/ipv4/tcp_keepalive_intvl /proc/sys/net/ipv4/tcp_keepalive_time /proc/sys/net/ipv4/tcp_keepalive_probes
+'''
+
+[[metrics]]
+
 id = "network"
 level = 0
 text = '''
@@ -510,18 +518,18 @@ fi
 `
 
 func (e *Linux) Label() string {
-	return "Linux"
+    return "Linux"
 }
 
 func (e *Linux) Config() string {
-	return sampleTemplateConfig
+    return sampleTemplateConfig
 }
 
 func init() {
-	AddExporter("linuxconf", func() Exporter {
-		host, _ := GetHostname()
-		return &Linux{
-			Server: host,
-		}
-	})
+    AddExporter("linuxconf", func() Exporter {
+        host, _ := GetHostname()
+        return &Linux{
+            Server: host,
+        }
+    })
 }

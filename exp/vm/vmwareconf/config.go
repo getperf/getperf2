@@ -79,60 +79,38 @@ server = "{{ .Server }}"
 
 [[metrics]]
 
-id = "config"
-
-[[metrics]]
-
 id = "summary"
-
-[[metrics]]
-
-id = "capability"
-
-[[metrics]]
-
-id = "datastore"
-
-[[metrics]]
-
-id = "environmentBrowser"
-
-[[metrics]]
-
-id = "guest"
-
-[[metrics]]
-
-id = "guestHeartbeatStatus"
-
-[[metrics]]
-
-id = "layoutEx"
-
-[[metrics]]
-
-id = "network"
+name = "仮想マシン名"
+level = 0
+category = "VM設定"
 
 [[metrics]]
 
 id = "resourceConfig"
+name = "CPU,メモリ割り当て制限"
+level = 0
+category = "VM設定"
 
 [[metrics]]
 
-id = "resourcePool"
+id = "guestHeartbeatStatus"
+name = "ハートビート状態"
+level = 0
+category = "VM設定"
 
 [[metrics]]
 
-id = "snapshot"
+id = "config"
+name = "ストレージ構成"
+level = 0
+category = "VM設定"
 
 [[metrics]]
 
-id = "storage"
-
-[[metrics]]
-
-id = "runtime"
-
+id = "guest"
+name = "ネットワーク構成"
+level = 0
+category = "VM設定"
 `
 
 func (e *VMWare) Label() string {

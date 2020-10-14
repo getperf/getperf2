@@ -80,34 +80,17 @@ server = "{{ .Server }}"
 [[metrics]]
 
 id = "summary"
+name = "バージョン"
+level = 0
+category = "OSリリース"
 
 [[metrics]]
 
 id = "config"
+name = "ネットワーク"
+level = 0
+category = "ネットワーク"
 
-[[metrics]]
-
-id = "capability"
-
-[[metrics]]
-
-id = "datastore"
-
-[[metrics]]
-
-id = "configManager"
-
-[[metrics]]
-
-id = "hardware"
-
-[[metrics]]
-
-id = "licensableResource"
-
-[[metrics]]
-
-id = "network"
 `
 
 func (e *VMWare) Label() string {

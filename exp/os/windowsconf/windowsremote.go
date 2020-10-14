@@ -73,7 +73,9 @@ func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Serv
 		fmt.Fprintf(e.errFile, "run : %s:%s\n", sv.Server, metric.Id)
 		if _, err = client.Run(cmd, outFile, e.errFile); err != nil {
 			// if strings.Contains(fmt.Sprintf("%s", err), "http error 401") {
-			if strings.Contains(fmt.Sprintf("%s", err), "error") {
+			msg := fmt.Sprintf("%s", err)
+			if strings.Contains(msg, "error") ||
+				strings.Contains(msg, "connection attempt failed") {
 				return HandleError(e.errFile, err, fmt.Sprintf("run %s", sv.Server))
 			}
 			HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", sv.Server, metric.Id))
