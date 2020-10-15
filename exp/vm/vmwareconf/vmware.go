@@ -131,7 +131,7 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 			if err == nil {
 				refVms = append(refVms, refAddedVm)
 			} else {
-				HandleError(errFile, err, "get remote vm defined in 'servers' parameter")
+				return HandleError(errFile, err, "get remote vm defined in 'servers' parameter")
 			}
 		}
 	}

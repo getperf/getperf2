@@ -109,14 +109,12 @@ func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, c
 	// 「予期しないファイル終了（EOF）」エラー回避のため、
 	// 改行コードは LF に統一する
 	command = convNewline(command, "\n")
-	fmt.Printf("cmd:%v,type:%v\n", command, execType)
 	if execType == "Cmd" {
 		err = session.Run(command)
 		if err != nil {
 			return errors.Wrap(err, "run command")
 		}
 	} else if execType == "Script" {
-		fmt.Printf("script:|%v|\n", command)
 		session.Stdin = bytes.NewBufferString(command + "\n")
 		if err := session.Shell(); err != nil {
 			return errors.Wrap(err, "run shell")
