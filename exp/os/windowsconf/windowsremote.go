@@ -10,6 +10,7 @@ import (
 
 	"github.com/getperf/getperf2/cfg"
 	. "github.com/getperf/getperf2/common"
+
 	"github.com/getperf/getperf2/exp/os/windowsconf/winrm-auth-ntlm"
 	"github.com/masterzen/winrm"
 	log "github.com/sirupsen/logrus"

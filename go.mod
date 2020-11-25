@@ -5,9 +5,7 @@ go 1.13
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/Songmu/timeout v0.4.0
-	github.com/ThomsonReutersEikon/go-ntlm v0.0.0-20181130171125-cf23bd1ecf18 // indirect
 	github.com/cavaliercoder/go-zabbix v0.0.0-20200608183504-1cdce1818710
-	github.com/dpotapov/winrm-auth-ntlm v0.0.0-20180606065705-7d8af67e034a
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/google/gops v0.3.10
 	github.com/gorilla/mux v1.7.4
