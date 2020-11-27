@@ -63,7 +63,10 @@ local_exec = true
 # 
 # id = "oracle_module"   # unique key
 # level = 0      # command level [0-2]
-# text = "ls /home/oracle/"
+# type = "Cmd"   # "Cmd":single command, "Script":multi line commands
+# text = '''
+# ls /home/oracle/"
+# '''
 
 [[metrics]]
 

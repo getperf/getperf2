@@ -3,6 +3,8 @@ package primergyconf
 import (
 	"context"
 	"crypto/tls"
+
+	// "encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -15,6 +17,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	// "github.com/tidwall/gjson"
 )
 
 func parseUrl(uri string) (string, error) {
@@ -27,6 +30,27 @@ func parseUrl(uri string) (string, error) {
 		return uri, errors.Wrapf(err, "parse url %s", uri)
 	}
 	return uri, nil
+}
+
+func (e *Primergy) runSimple(ctx context.Context, client *resty.Client, metric *Metric) error {
+	requestUrl := e.url + metric.Text
+	resp, err := client.R().
+		SetHeader("Accept", "application/json").
+		SetOutput(metric.Id).
+		Get(requestUrl)
+	if err != nil {
+		return HandleError(e.errFile, err, metric.Text)
+	}
+	if code := resp.StatusCode(); code >= 400 {
+		err := fmt.Errorf("get:%s,status code:%d", requestUrl, code)
+		HandleError(e.errFile, err, metric.Id)
+	}
+	return nil
+}
+
+func (e *Primergy) runBatch(ctx context.Context, client *resty.Client, metric *Metric) error {
+	log.Infof("run batch : %v\n", metric.Batch)
+	return nil
 }
 
 func (e *Primergy) Run(ctx context.Context, env *cfg.RunEnv) error {
@@ -52,28 +76,46 @@ func (e *Primergy) Run(ctx context.Context, env *cfg.RunEnv) error {
 		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	}
 
-	url, err := parseUrl(e.Url)
+	e.url, err = parseUrl(e.Url)
 	if err != nil {
 		return HandleError(errFile, err, "init rest client")
 	}
+	e.errFile = errFile
 
-	for _, command := range commands {
-		if command.Level > env.Level {
+	// requestUrl := url + "/rest/v1/Oem/eLCM/ProfileManagement/get?PARAM_PATH=Server/HWConfigurationIrmc/Adapters/RAIDAdapter"
+	// fmt.Printf("url:%v\n", requestUrl)
+	// resp, err := client.R().
+	// 	SetHeader("Accept", "application/json").
+	// 	Post(requestUrl)
+	// if err != nil {
+	// 	return HandleError(errFile, err, "metric.Text")
+	// }
+	// if code := resp.StatusCode(); code >= 400 {
+	// 	err := fmt.Errorf("get:%s,status code:%d", requestUrl, code)
+	// 	HandleError(errFile, err, "metric.Id")
+	// }
+	// // fmt.Printf("RESPONSE:%v\n", resp.Result)
+	// fmt.Printf("RESPONSE2:%v\n", resp.String())
+	// // bytes, err := json.Marshal(resp.Result)
+	// // if err != nil {
+	// // 	return HandleError(errFile, err, "decode json result")
+	// // }
+	// // fmt.Printf("RESPONSE:%v\n", string(bytes))
+	// value := gjson.Get(resp.String(), "Session.Id").String()
+	// fmt.Printf("Session.Id:%v\n", value)
+
+	metrics = append(metrics, e.Metrics...)
+	for _, metric := range metrics {
+		if metric.Level > env.Level {
 			continue
 		}
-		if command.Id == "" {
+		if metric.Id == "" || metric.Text == "" {
 			continue
 		}
-		requestUrl := url + command.Text
-		resp, err := client.R().
-			SetOutput(command.Id).
-			Get(requestUrl)
-		if err != nil {
-			return HandleError(errFile, err, command.Text)
-		}
-		if code := resp.StatusCode(); code >= 400 {
-			err := fmt.Errorf("get:%s,status code:%d", requestUrl, code)
-			HandleError(errFile, err, command.Id)
+		if metric.Batch == "" {
+			e.runSimple(ctx, client, metric)
+		} else {
+			e.runBatch(ctx, client, metric)
 		}
 	}
 	log.Infof("run %s:elapse %s", e.Server, time.Since(startTime))
