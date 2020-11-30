@@ -127,27 +127,27 @@ scope chassis
 show  storageadapter detail
 '''
 
-# [[metrics]]
-# 
-# id = "physical_drive"
-# type = "Script"
-# text = '''
-# top
-# scope chassis
-# scope storageadapter {storageadapter}
-# show  physical-drive detail
-# '''
-# 
-# [[metrics]]
-# 
-# id = "virtual_drive"
-# type = "Script"
-# text = '''
-# top
-# scope chassis
-# scope storageadapter {storageadapter}
-# show  virtual-drive detail
-# '''
+[[metrics]]
+
+id = "physical_drive"
+type = "Script"
+text = '''
+top
+scope chassis
+scope storageadapter MRAID
+show  physical-drive detail
+'''
+
+[[metrics]]
+
+id = "virtual_drive"
+type = "Script"
+text = '''
+top
+scope chassis
+scope storageadapter MRAID
+show  virtual-drive detail
+'''
 
 [[metrics]]
 

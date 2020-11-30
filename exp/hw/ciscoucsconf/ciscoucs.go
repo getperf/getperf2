@@ -97,6 +97,11 @@ func convNewline(str, nlcode string) string {
 	).Replace(str)
 }
 
+// CIMC オプションにYAML出力設定追加
+func addCommandOption(str string) string {
+	return "set cli output yaml\n" + str
+}
+
 func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, command string) error {
 	session, err := conn.NewSession()
 	if err != nil {
@@ -108,6 +113,8 @@ func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, c
 	session.Stderr = stdErr
 	// 「予期しないファイル終了（EOF）」エラー回避のため、
 	// 改行コードは LF に統一する
+
+	command = addCommandOption(command)
 	command = convNewline(command, "\n")
 	if execType == "Cmd" || execType == "" {
 		err = session.Run(command)
