@@ -98,7 +98,7 @@ kstat -p cpu_info
 
 id = "psrinfo"
 text = '''
-psrinfo
+/usr/sbin/psrinfo
 '''
 
 [[metrics]]
@@ -189,6 +189,7 @@ text = '''
 [[metrics]]
 
 id = "patches"
+type = "Script"
 text = '''
 ls /var/sadm/patch 2>/dev/null
 '''
