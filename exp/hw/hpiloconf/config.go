@@ -46,7 +46,7 @@ server = "{{ .Server }}"
 # 
 # example:
 # 
-# [[commands]]
+# [[metrics]]
 # 
 # id = "oviewview" # unique key
 # level = 0        # command level [0-2]

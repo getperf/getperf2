@@ -18,6 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -105,11 +106,14 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 	finder.SetDatacenter(dc)
 
 	// データセンター内の仮装インスタンスリストを取得
-	log.Info("search host : ", e.Server)
-	// refVms, err := finder.HostSystemList(ctx, e.Server)
-	refVms, err := finder.HostSystemList(ctx, "*")
-	if err != nil {
-		HandleError(errFile, err, "get local host defined in 'server' parameter")
+	var refVms []*object.HostSystem
+	if e.Server != "" {
+		log.Info("search host : ", e.Server)
+		refVms, err = finder.HostSystemList(ctx, e.Server)
+		// refVms, err := finder.HostSystemList(ctx, "*")
+		if err != nil {
+			HandleError(errFile, err, "get local host defined in 'server' parameter")
+		}
 	}
 	if len(e.Servers) > 0 {
 		for _, addedServer := range e.Servers {
