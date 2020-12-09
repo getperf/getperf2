@@ -3,6 +3,7 @@ package all
 import (
 	_ "github.com/getperf/getperf2/exp/hw/ciscoucsconf"
 	_ "github.com/getperf/getperf2/exp/hw/hpiloconf"
+	_ "github.com/getperf/getperf2/exp/hw/netappconf"
 	_ "github.com/getperf/getperf2/exp/hw/primergyconf"
 	_ "github.com/getperf/getperf2/exp/monitor/zabbixconf"
 	_ "github.com/getperf/getperf2/exp/os/linuxconf"
