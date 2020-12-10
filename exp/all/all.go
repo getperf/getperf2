@@ -2,6 +2,7 @@ package all
 
 import (
 	_ "github.com/getperf/getperf2/exp/hw/ciscoucsconf"
+	_ "github.com/getperf/getperf2/exp/hw/hitachivspconf"
 	_ "github.com/getperf/getperf2/exp/hw/hpiloconf"
 	_ "github.com/getperf/getperf2/exp/hw/netappconf"
 	_ "github.com/getperf/getperf2/exp/hw/primergyconf"
