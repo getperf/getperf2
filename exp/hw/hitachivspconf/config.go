@@ -5,6 +5,7 @@ import (
 
 	. "github.com/getperf/getperf2/common"
 	. "github.com/getperf/getperf2/exp"
+	"github.com/go-resty/resty/v2"
 )
 
 const Version = "0.1.4"
@@ -18,11 +19,15 @@ type HitachiVSP struct {
 	Servers  []string  `toml:"servers"`
 	Metrics  []*Metric `toml:"metrics"`
 
-	url       string
-	errFile   io.Writer
-	vmName    string
-	datastore string
-	json      string
+	url             string
+	errFile         io.Writer
+	vmName          string
+	datastore       string
+	json            string
+	client          *resty.Client
+	storageDeviceId string
+	token           string
+	sessionId       string
 }
 
 var sampleTemplateConfig = `
@@ -54,21 +59,71 @@ server = "{{ .Server }}"
 # 
 # Reference : 
 # 
+# http://itdoc.hitachi.co.jp/manuals/3021/3021901610/INDEX.HTM
+# 
 # example:
 # 
 # [[metrics]]
 # 
 # id = "oviewview"        # unique key
 # level = 0               # command level [0-2]
-# batch = ""              # profile management URL to get the batch report
-# text = "/json/overview" # request URL
+# text = "/json/overview" # request URL. Replace the string '{id}' with the storage device ID
 
 # The following commented out metrics are set by default
 
 # [[metrics]]
 # 
-# id = "overview"
-# text = "/ConfigurationManager/v1/objects/storages/"
+# id = "storage"
+# level = 0
+# text = "/ConfigurationManager/v1/objects/storages/{id}"
+#
+# [[metrics]]
+# 
+# id = "host-groups"
+# level = 0
+# text = "/ConfigurationManager/v1/objects/storages/{id}/host-groups"
+#
+# [[metrics]]
+# 
+# id = "ports"
+# level = 0
+# text = "/ConfigurationManager/v1/objects/storages/{id}/ports"
+#
+# [[metrics]]
+# 
+# id = "ports"
+# level = 0
+# text = "/ConfigurationManager/v1/objects/storages/{id}/ports"
+#
+# [[metrics]]
+# 
+# id = "parity-groups"
+# level = 0
+# text = "/ConfigurationManager/v1/objects/storages/{id}/parity-groups"
+#
+# [[metrics]]
+# 
+# id = "ldevs"
+# level = 0
+# text = "/ConfigurationManager/v1/objects/storages/{id}/ldevs?headLdevId=0&count=100"
+#
+# [[metrics]]
+# 
+# id = "users"
+# level = 0
+# text = "/ConfigurationManager/v1/objects/storages/{id}/users"
+#
+# [[metrics]]
+# 
+# id = "ambient"
+# level = 0
+# text = "/ConfigurationManager/v1/objects/storages/{id}/components/instance"
+#
+# [[metrics]]
+# 
+# id = "snmp"
+# level = 0
+# text = "/ConfigurationManager/v1/objects/storages/{id}/snmp-settings/instance"
 `
 
 func (e *HitachiVSP) Label() string {
