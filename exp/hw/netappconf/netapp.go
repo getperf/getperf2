@@ -27,6 +27,7 @@ import (
 var (
 	defaultTimeoutDuration = 100 * time.Second
 	timeoutKillAfter       = 1 * time.Second
+	netAppSetCommand       = `set -showallfields true -rows 0 -showseparator "<|>" -units GB;`
 )
 
 func getSshKey(keypath string) (ssh.Signer, error) {
@@ -97,11 +98,6 @@ func convNewline(str, nlcode string) string {
 	).Replace(str)
 }
 
-// CIMC オプションにYAML出力設定追加
-func addCommandOption(str string) string {
-	return "set cli output yaml\n" + str
-}
-
 func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, command string) error {
 	session, err := conn.NewSession()
 	if err != nil {
@@ -114,7 +110,6 @@ func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, c
 	// 「予期しないファイル終了（EOF）」エラー回避のため、
 	// 改行コードは LF に統一する
 
-	command = addCommandOption(command)
 	command = convNewline(command, "\n")
 	if execType == "Cmd" || execType == "" {
 		err = session.Run(command)
@@ -134,38 +129,38 @@ func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, c
 	return nil
 }
 
-func (e *NetAPP) RunRemoteServer(ctx context.Context, env *cfg.RunEnv) error {
-	log.Info("collect remote server : ", e.Server)
-	e.datastore = filepath.Join(env.Datastore, e.Server)
-	if err := os.MkdirAll(e.datastore, 0755); err != nil {
-		return HandleError(e.errFile, err, "create log directory")
-	}
-	client, err := sshConnect(e.Url, e.User, e.Password, e.SshKeyPath)
-	if err != nil {
-		return HandleError(e.errFile, err, "connect remote server")
-	}
-	defer client.Close()
-	for _, metric := range e.Metrics {
-		if metric.Level == -1 || metric.Level > env.Level {
-			continue
-		}
-		if metric.Id == "" || metric.Text == "" {
-			continue
-		}
-		startTime := time.Now()
-		outFile, err := env.OpenServerLog(e.Server, metric.Id)
-		if err != nil {
-			return HandleError(e.errFile, err, "prepare inventory log")
-		}
-		defer outFile.Close()
-		log.Infof("run %s %s %s", outFile, time.Since(startTime))
-		// if err := RunCommand(outFile, e.errFile, client, metric.Type, metric.Text); err != nil {
-		// 	HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", e.Server, metric.Id))
-		// }
-		// log.Infof("run %s:%s,elapse %s", e.Server, metric.Id, time.Since(startTime))
-	}
-	return nil
-}
+// func (e *NetAPP) RunRemoteServer(ctx context.Context, env *cfg.RunEnv) error {
+// 	log.Info("collect remote server : ", e.Server)
+// 	e.datastore = filepath.Join(env.Datastore, e.Server)
+// 	if err := os.MkdirAll(e.datastore, 0755); err != nil {
+// 		return HandleError(e.errFile, err, "create log directory")
+// 	}
+// 	client, err := sshConnect(e.Url, e.User, e.Password, e.SshKeyPath)
+// 	if err != nil {
+// 		return HandleError(e.errFile, err, "connect remote server")
+// 	}
+// 	defer client.Close()
+// 	for _, metric := range e.Metrics {
+// 		if metric.Level == -1 || metric.Level > env.Level {
+// 			continue
+// 		}
+// 		if metric.Id == "" || metric.Text == "" {
+// 			continue
+// 		}
+// 		startTime := time.Now()
+// 		outFile, err := env.OpenServerLog(e.Server, metric.Id)
+// 		if err != nil {
+// 			return HandleError(e.errFile, err, "prepare inventory log")
+// 		}
+// 		defer outFile.Close()
+// 		log.Infof("run %s %s %s", outFile, time.Since(startTime))
+// 		// if err := RunCommand(outFile, e.errFile, client, metric.Type, metric.Text); err != nil {
+// 		// 	HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", e.Server, metric.Id))
+// 		// }
+// 		// log.Infof("run %s:%s,elapse %s", e.Server, metric.Id, time.Since(startTime))
+// 	}
+// 	return nil
+// }
 
 func (e *NetAPP) Run(ctx context.Context, env *cfg.RunEnv) error {
 	startTime := time.Now()
@@ -175,11 +170,58 @@ func (e *NetAPP) Run(ctx context.Context, env *cfg.RunEnv) error {
 	}
 	defer errFile.Close()
 	e.errFile = errFile
-	e.Env = env
 
-	if err = e.RunRemoteServer(ctx, env); err != nil {
-		msg := fmt.Sprintf("run remote server '%s'", e.Server)
-		HandleErrorWithAlert(e.errFile, err, msg)
+	var servers []string
+	if e.Server != "" {
+		servers = append(servers, e.Server)
+	}
+	servers = append(servers, e.Servers...)
+	for _, server := range servers {
+		datastore := filepath.Join(env.Datastore, server)
+		if err := os.MkdirAll(datastore, 0755); err != nil {
+			return HandleError(errFile, err, "create log directory")
+		}
+	}
+	client, err := sshConnect(e.Url, e.User, e.Password, "")
+	if err != nil {
+		return HandleError(e.errFile, err, "connect NetAPP management server")
+	}
+	defer client.Close()
+
+	metrics = append(metrics, e.Metrics...)
+	for _, metric := range metrics {
+		if metric.Level > env.Level {
+			continue
+		}
+		if metric.Id == "" || metric.Text == "" {
+			continue
+		}
+		if !metric.Remote {
+			log.Infof("get metric: %s", metric.Id)
+			logFile, err := env.OpenLog(metric.Id)
+			if err != nil {
+				return HandleError(e.errFile, err, metric.Id)
+			}
+			defer logFile.Close()
+			cmd := netAppSetCommand + metric.Text
+			if err := RunCommand(logFile, e.errFile, client, metric.Type, cmd); err != nil {
+				HandleError(e.errFile, err, metric.Id)
+			}
+		} else {
+			for _, server := range servers {
+				log.Infof("get metric: %s, node : %s", metric.Id, server)
+				logFile, err := env.OpenServerLog(server, metric.Id)
+				if err != nil {
+					return HandleError(e.errFile, err, metric.Id)
+				}
+				defer logFile.Close()
+				cmd := netAppSetCommand + metric.Text
+				cmd = strings.Replace(cmd, "{host}", server, -1)
+				if err := RunCommand(logFile, e.errFile, client, metric.Type, cmd); err != nil {
+					HandleError(e.errFile, err, metric.Id)
+				}
+			}
+		}
 	}
 	msg := fmt.Sprintf("Elapse %s", time.Since(startTime))
 	log.Infof("Complete NetAPP inventory collection %s", msg)

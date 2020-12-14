@@ -11,14 +11,14 @@ import (
 const Version = "0.1.4"
 
 type NetAPP struct {
-    Server     string `toml:"server"`
-    Url        string `toml:"url"`
-    User       string `toml:"user"`
-    Password   string `toml:"password"`
-    SshKeyPath string `toml:"ssh_key"`
-    Insecure   bool   `toml:"insecure"`
-
-    Metrics []*Metric `toml:"metrics"`
+    Url        string    `toml:"url"`
+    User       string    `toml:"user"`
+    Password   string    `toml:"password"`
+    SshKeyPath string    `toml:"ssh_key"`
+    Insecure   bool      `toml:"insecure"`
+    Server     string    `toml:"server"`
+    Servers    []string  `toml:"servers"`
+    Metrics    []*Metric `toml:"metrics"`
 
     Env       *cfg.RunEnv
     errFile   io.Writer
@@ -27,14 +27,14 @@ type NetAPP struct {
 
 var sampleTemplateConfig = `
 # NetAPP storage inventory collector configuration
-# Enter the information for NetAPP login account
+# Enter the information for NetAPP CLI SSH login account
 # 
 # example:
 #
 # url = "192.168.10.100"
 # user = "test_user"
 # password = "P@ssword"
-# server = "sol10"
+# server = "netapp"
 
 url = "{{ .Url }}"
 user = "{{ .User }}"
@@ -50,25 +50,130 @@ server = "{{ .Server }}"
 # '\"', '\\', See these example,
 # 
 # example:
+#
+# [[metrics]]
+# 
+# id = "sysconfig"       # unique key
+# level = 0              # command level [0:Default,1,2]
+# remote = true          # Set to false for clusters, true for remote server
+# type = "Cmd"           # "Cmd" or "Shell"
+# text = '''             # Command. Replace the string '{host}' with the remote server
+# run {host} sysconfig -a
+# '''
+
+# The following commented out metrics are set by default
+
+# [[metrics]]
+# 
+# id = "subsystem_health"
+# remote = true
+# text = '''
+# system health subsystem show -node {host}
+# '''
 # 
 # [[metrics]]
 # 
-# id = "oracle_module"   # unique key
-# level = 0    # command level [0:Default,1,2]
-# type = "Cmd" # "Cmd":single command(Defalut), "Script":multi line commands
+# id = "storage_failover"
+# remote = true
 # text = '''
-# ls /home/oracle/"
+# storage failover show -node {host}
 # '''
-
-[[metrics]]
-
-id = "bios"
-type = "Script"
-text = '''
-top
-show bios detail
-'''
-
+# 
+# [[metrics]]
+# 
+# id = "memory"
+# remote = true
+# text = '''
+# system controller memory dimm show -node {host}
+# '''
+# 
+# [[metrics]]
+# 
+# id = "license"
+# remote = true
+# text = '''
+# system license show -owner {host}
+# '''
+# 
+# [[metrics]]
+# 
+# id = "processor"
+# remote = true
+# text = '''
+# system controller show -node {host}
+# '''
+# 
+# [[metrics]]
+# 
+# id = "volume"
+# remote = true
+# text = '''
+# volume show -nodes {host}
+# '''
+# 
+# [[metrics]]
+# 
+# id = "aggregate_status"
+# remote = true
+# text = '''
+# aggr show -owner-name {host}
+# '''
+# 
+# [[metrics]]
+# 
+# id = "sysconfig"
+# remote = true
+# text = '''
+# run {host} sysconfig -a
+# '''
+# 
+# [[metrics]]
+# 
+# id = "sysconfig_raid"
+# remote = true
+# text = '''
+# run {host} sysconfig -r
+# '''
+# 
+# [[metrics]]
+# 
+# id = "snmp"
+# remote = false
+# text = '''
+# system snmp show
+# '''
+# 
+# [[metrics]]
+# 
+# id = "ntp"
+# remote = false
+# text = '''
+# cluster time-service ntp server show
+# '''
+#
+# [[metrics]]
+# 
+# id = "network_interface"
+# remote = false
+# text = '''
+# network interface show
+# '''
+# 
+# [[metrics]]
+# 
+# id = "version"
+# remote = false
+# text = '''
+# version
+# '''
+# 
+# [[metrics]]
+# 
+# id = "vserver"
+# remote = false
+# text = '''
+# vserver show
+# '''
 `
 
 func (e *NetAPP) Label() string {
