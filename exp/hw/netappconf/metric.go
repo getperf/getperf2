@@ -45,9 +45,10 @@ var metrics = []*Metric{
 	NewMetric(0, "Cmd", true, "aggregate_status", "aggr show -owner-name {host}"),
 	NewMetric(0, "Cmd", true, "sysconfig", "run {host} sysconfig -a"),
 	NewMetric(0, "Cmd", true, "sysconfig_raid", "run {host} sysconfig -r"),
+	NewMetric(0, "Cmd", true, "network_interface", "network interface show -curr-node {host}"),
 	NewMetric(0, "Cmd", false, "version", "version"),
-	NewMetric(0, "Cmd", false, "network_interface", "network interface show"),
 	NewMetric(0, "Cmd", false, "vserver", "vserver show"),
 	NewMetric(0, "Cmd", false, "snmp", "system snmp show"),
 	NewMetric(0, "Cmd", false, "ntp", "cluster time-service ntp server show"),
+	NewMetric(0, "Cmd", false, "df", "df"),
 }

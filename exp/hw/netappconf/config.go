@@ -150,14 +150,6 @@ server = "{{ .Server }}"
 # text = '''
 # cluster time-service ntp server show
 # '''
-#
-# [[metrics]]
-# 
-# id = "network_interface"
-# remote = false
-# text = '''
-# network interface show
-# '''
 # 
 # [[metrics]]
 # 
@@ -166,6 +158,14 @@ server = "{{ .Server }}"
 # text = '''
 # version
 # '''
+#
+# [[metrics]]
+# 
+# id = "network_interface"
+# remote = true
+# text = '''
+# network interface show -curr-node {host}
+# '''
 # 
 # [[metrics]]
 # 
@@ -173,6 +173,14 @@ server = "{{ .Server }}"
 # remote = false
 # text = '''
 # vserver show
+# '''
+#
+# [[metrics]]
+# 
+# id = "df"
+# remote = false
+# text = '''
+# df
 # '''
 `
 
