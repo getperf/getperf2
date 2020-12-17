@@ -14,6 +14,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	defaultTimeoutDuration = 100 * time.Second
+	timeoutKillAfter       = 1 * time.Second
+)
+
 var cmdBase = []string{"sh", "-c"}
 
 func (e *Linux) RunLocalCommand(ctx context.Context, metric *Metric) error {
