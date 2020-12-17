@@ -106,7 +106,7 @@ func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, c
 	// 「予期しないファイル終了（EOF）」エラー回避のため、
 	// 改行コードは LF に統一する
 	command = convNewline(command, "\n")
-	fmt.Printf("command:%v,type:%v\n", command, execType)
+	// fmt.Printf("command:%v,type:%v\n", command, execType)
 	if execType == "Cmd" || execType == "" {
 		err = session.Run(command)
 		if err != nil {

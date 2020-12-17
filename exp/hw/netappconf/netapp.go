@@ -1,12 +1,12 @@
 package netappconf
 
 import (
-	"bytes"
+	// "bytes"
 	"context"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"net/url"
+	// "io"
+	// "io/ioutil"
+	// "net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,120 +14,125 @@ import (
 
 	"github.com/getperf/getperf2/cfg"
 	. "github.com/getperf/getperf2/common"
+	"github.com/getperf/getperf2/common/sshx"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/ssh"
+	// "golang.org/x/crypto/ssh"
 )
-
-// ToDo: SSH接続タイムアウトの実装
-// net.Conn を介してアイドルタイムアウトの接続を作成する
-// Reference:
-// https://ja.coder.work/so/ssh/456706
 
 var (
-	defaultTimeoutDuration = 100 * time.Second
-	timeoutKillAfter       = 1 * time.Second
-	netAppSetCommand       = `set -showallfields true -rows 0 -showseparator "<|>" -units GB;`
+	netAppSetCommand = `set -showallfields true -rows 0 -showseparator "<|>" -units GB;`
 )
 
-func getSshKey(keypath string) (ssh.Signer, error) {
-	buf, err := ioutil.ReadFile(keypath)
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("read key %s", keypath))
-	}
-	key, err := ssh.ParsePrivateKey(buf)
-	if err != nil {
-		return nil, errors.Wrap(err, "private key parse")
-	}
-	return key, nil
-}
+// // ToDo: SSH接続タイムアウトの実装
+// // net.Conn を介してアイドルタイムアウトの接続を作成する
+// // Reference:
+// // https://ja.coder.work/so/ssh/456706
 
-func parseSshUrl(uri string) (string, string, error) {
-	var ip, port string
-	if !strings.HasPrefix(uri, "ssh://") {
-		uri = "ssh://" + uri
-	}
-	u, err := url.Parse(uri)
-	if err != nil {
-		return ip, port, errors.Wrap(err, fmt.Sprintf("parse ssh url %s", uri))
-	}
-	ip = u.Hostname()
-	port = u.Port()
-	if port == "" {
-		port = "22"
-	}
-	return ip, port, nil
-}
+// var (
+// 	defaultTimeoutDuration = 100 * time.Second
+// 	timeoutKillAfter       = 1 * time.Second
+// 	netAppSetCommand       = `set -showallfields true -rows 0 -showseparator "<|>" -units GB;`
+// )
 
-func sshConnect(url, user, pass, keypath string) (*ssh.Client, error) {
-	ip, port, err := parseSshUrl(url)
-	if err != nil {
-		return nil, errors.Wrap(err, "prepare ssh connect")
-	}
-	auths := make([]ssh.AuthMethod, 0, 2)
-	if pass != "" {
-		auths = append(auths, ssh.Password(pass))
-	}
-	if keypath != "" {
-		key, err := getSshKey(keypath)
-		if err != nil {
-			return nil, errors.Wrap(err, "get ssh key")
-		}
-		auths = append(auths, ssh.PublicKeys(key))
-	}
-	config := &ssh.ClientConfig{
-		User:            user,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Auth:            auths,
-	}
+// func getSshKey(keypath string) (ssh.Signer, error) {
+// 	buf, err := ioutil.ReadFile(keypath)
+// 	if err != nil {
+// 		return nil, errors.Wrap(err, fmt.Sprintf("read key %s", keypath))
+// 	}
+// 	key, err := ssh.ParsePrivateKey(buf)
+// 	if err != nil {
+// 		return nil, errors.Wrap(err, "private key parse")
+// 	}
+// 	return key, nil
+// }
 
-	conn, err := ssh.Dial("tcp", ip+":"+port, config)
-	if err != nil {
-		return nil, fmt.Errorf("ssh connect failed : %s", err)
-	}
-	log.Infof("connected : %s", url)
-	return conn, nil
-}
+// func parseSshUrl(uri string) (string, string, error) {
+// 	var ip, port string
+// 	if !strings.HasPrefix(uri, "ssh://") {
+// 		uri = "ssh://" + uri
+// 	}
+// 	u, err := url.Parse(uri)
+// 	if err != nil {
+// 		return ip, port, errors.Wrap(err, fmt.Sprintf("parse ssh url %s", uri))
+// 	}
+// 	ip = u.Hostname()
+// 	port = u.Port()
+// 	if port == "" {
+// 		port = "22"
+// 	}
+// 	return ip, port, nil
+// }
 
-// 改行コードを統一する。
-func convNewline(str, nlcode string) string {
-	return strings.NewReplacer(
-		"\r\n", nlcode,
-		"\r", nlcode,
-		"\n", nlcode,
-	).Replace(str)
-}
+// func sshConnect(url, user, pass, keypath string) (*ssh.Client, error) {
+// 	ip, port, err := parseSshUrl(url)
+// 	if err != nil {
+// 		return nil, errors.Wrap(err, "prepare ssh connect")
+// 	}
+// 	auths := make([]ssh.AuthMethod, 0, 2)
+// 	if pass != "" {
+// 		auths = append(auths, ssh.Password(pass))
+// 	}
+// 	if keypath != "" {
+// 		key, err := getSshKey(keypath)
+// 		if err != nil {
+// 			return nil, errors.Wrap(err, "get ssh key")
+// 		}
+// 		auths = append(auths, ssh.PublicKeys(key))
+// 	}
+// 	config := &ssh.ClientConfig{
+// 		User:            user,
+// 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+// 		Auth:            auths,
+// 	}
 
-func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, command string) error {
-	session, err := conn.NewSession()
-	if err != nil {
-		return errors.Wrap(err, "prepare command")
-	}
-	defer session.Close()
+// 	conn, err := ssh.Dial("tcp", ip+":"+port, config)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("ssh connect failed : %s", err)
+// 	}
+// 	log.Infof("connected : %s", url)
+// 	return conn, nil
+// }
 
-	session.Stdout = stdOut
-	session.Stderr = stdErr
-	// 「予期しないファイル終了（EOF）」エラー回避のため、
-	// 改行コードは LF に統一する
+// // 改行コードを統一する。
+// func convNewline(str, nlcode string) string {
+// 	return strings.NewReplacer(
+// 		"\r\n", nlcode,
+// 		"\r", nlcode,
+// 		"\n", nlcode,
+// 	).Replace(str)
+// }
 
-	command = convNewline(command, "\n")
-	if execType == "Cmd" || execType == "" {
-		err = session.Run(command)
-		if err != nil {
-			return errors.Wrap(err, "run command")
-		}
-	} else if execType == "Script" {
-		session.Stdin = bytes.NewBufferString(command + "\n")
-		if err := session.Shell(); err != nil {
-			return errors.Wrap(err, "run shell")
-		}
-		if err := session.Wait(); err != nil {
-			return errors.Wrap(err, "run shell")
-		}
-	}
+// func RunCommand(stdOut, stdErr io.Writer, conn *ssh.Client, execType ExecType, command string) error {
+// 	session, err := conn.NewSession()
+// 	if err != nil {
+// 		return errors.Wrap(err, "prepare command")
+// 	}
+// 	defer session.Close()
 
-	return nil
-}
+// 	session.Stdout = stdOut
+// 	session.Stderr = stdErr
+// 	// 「予期しないファイル終了（EOF）」エラー回避のため、
+// 	// 改行コードは LF に統一する
+
+// 	command = convNewline(command, "\n")
+// 	if execType == "Cmd" || execType == "" {
+// 		err = session.Run(command)
+// 		if err != nil {
+// 			return errors.Wrap(err, "run command")
+// 		}
+// 	} else if execType == "Script" {
+// 		session.Stdin = bytes.NewBufferString(command + "\n")
+// 		if err := session.Shell(); err != nil {
+// 			return errors.Wrap(err, "run shell")
+// 		}
+// 		if err := session.Wait(); err != nil {
+// 			return errors.Wrap(err, "run shell")
+// 		}
+// 	}
+
+// 	return nil
+// }
 
 // func (e *NetAPP) RunRemoteServer(ctx context.Context, env *cfg.RunEnv) error {
 // 	log.Info("collect remote server : ", e.Server)
@@ -182,7 +187,7 @@ func (e *NetAPP) Run(ctx context.Context, env *cfg.RunEnv) error {
 			return HandleError(errFile, err, "create log directory")
 		}
 	}
-	client, err := sshConnect(e.Url, e.User, e.Password, "")
+	client, err := sshx.SshConnect(e.Url, e.User, e.Password, "")
 	if err != nil {
 		return HandleError(e.errFile, err, "connect NetAPP management server")
 	}
@@ -204,7 +209,7 @@ func (e *NetAPP) Run(ctx context.Context, env *cfg.RunEnv) error {
 			}
 			defer logFile.Close()
 			cmd := netAppSetCommand + metric.Text
-			if err := RunCommand(logFile, e.errFile, client, metric.Type, cmd); err != nil {
+			if err := sshx.RunCommand(logFile, e.errFile, client, metric.Type, cmd); err != nil {
 				HandleError(e.errFile, err, metric.Id)
 			}
 		} else {
@@ -217,7 +222,7 @@ func (e *NetAPP) Run(ctx context.Context, env *cfg.RunEnv) error {
 				defer logFile.Close()
 				cmd := netAppSetCommand + metric.Text
 				cmd = strings.Replace(cmd, "{host}", server, -1)
-				if err := RunCommand(logFile, e.errFile, client, metric.Type, cmd); err != nil {
+				if err := sshx.RunCommand(logFile, e.errFile, client, metric.Type, cmd); err != nil {
 					HandleError(e.errFile, err, metric.Id)
 				}
 			}

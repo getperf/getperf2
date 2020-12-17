@@ -1,19 +1,23 @@
 package ciscoucsconf
 
-import "io"
+import (
+	"io"
 
-type ExecType string
-
-const (
-	Cmd    = ExecType("Cmd")
-	Script = ExecType("Script")
+	"github.com/getperf/getperf2/common/sshx"
 )
 
+// type ExecType string
+
+// const (
+// 	Cmd    = ExecType("Cmd")
+// 	Script = ExecType("Script")
+// )
+
 type Metric struct {
-	Level int      `toml:"level"`
-	Type  ExecType `toml:"type"`
-	Id    string   `toml:"id"`
-	Text  string   `toml:"text"`
+	Level int           `toml:"level"`
+	Type  sshx.ExecType `toml:"type"`
+	Id    string        `toml:"id"`
+	Text  string        `toml:"text"`
 
 	stdOut io.Writer
 	stdErr io.Writer
@@ -23,7 +27,7 @@ type Metrics struct {
 	Metrics []*Metric
 }
 
-func NewMetric(level int, execType ExecType, id string, text string) *Metric {
+func NewMetric(level int, execType sshx.ExecType, id string, text string) *Metric {
 	metric := &Metric{
 		Level: level,
 		Type:  execType,
