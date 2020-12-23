@@ -32,13 +32,6 @@ const (
 
 var vmMetrics = []string{}
 
-// var vmMetrics = []string{
-// 	"config", "summary", "capability", "datastore",
-// 	"environmentBrowser", "guest", "guestHeartbeatStatus",
-// 	"layoutEx", "network", "resourceConfig", "resourcePool",
-// 	"snapshot", "storage", "runtime",
-// }
-
 func (e *VMWare) saveJson(ioErr io.Writer, outfile, query string) {
 	value := gjson.Get(e.json, query).String()
 	if value == "" {
@@ -52,31 +45,14 @@ func (e *VMWare) saveJson(ioErr io.Writer, outfile, query string) {
 }
 
 func (e *VMWare) retrieveInventory(env *cfg.RunEnv, ioErr io.Writer, vm string) {
-	for _, metric := range e.Metrics {
+	for _, metric := range metrics {
 		objectId := metric.getObjectId()
 		if metric.Level == -1 || metric.Level > env.Level || objectId == "" {
 			continue
 		}
 		query := strcase.ToCamel(objectId)
-		e.saveJson(ioErr, objectId, query)
+		e.saveJson(ioErr, metric.Id, query)
 	}
-	// Default extraction
-	// e.saveJson(ioErr, "base_hardware",
-	// 	"Config.Hardware")
-	// e.saveJson(ioErr, "base_cpu_memory_resource",
-	// 	"{ResourceConfig.CpuAllocation,ResourceConfig.MemoryAllocation}")
-	// e.saveJson(ioErr, "base_datastore",
-	// 	"Storage.PerDatastoreUsage")
-	// e.saveJson(ioErr, "base_disk",
-	// 	"Guest.Disk")
-	// e.saveJson(ioErr, "base_boot",
-	// 	"Config.BootOptions")
-	// e.saveJson(ioErr, "base_ipstack",
-	// 	"Guest.IpStack")
-	// e.saveJson(ioErr, "base_net",
-	// 	"Guest.Net")
-	// e.saveJson(ioErr, "base_ext_config",
-	// 	"Config.ExtraConfig")
 }
 
 func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
@@ -138,7 +114,8 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 	// 	log.Info("add metrics : ", e.Metrics)
 	// 	vmMetrics = append(vmMetrics, e.Metrics...)
 	// }
-	for _, metric := range e.Metrics {
+	metrics = append(metrics, e.Metrics...)
+	for _, metric := range metrics {
 		if metric.Level == -1 || metric.Level > env.Level {
 			continue
 		}
@@ -146,7 +123,7 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 		if objectId == "" {
 			continue
 		}
-		log.Info("add metrics : ", objectId)
+		log.Info("add metrics : ", metric.Id)
 		vmMetrics = append(vmMetrics, objectId)
 	}
 	err = pc.Retrieve(ctx, refs, vmMetrics, &vms)

@@ -7,20 +7,6 @@ import (
 
 const Version = "0.1.4"
 
-type Metric struct {
-	Id    string `toml:"id"`
-	Level int    `toml:"level"`
-	Text  string `toml:"text"`
-}
-
-func (metric *Metric) getObjectId() string {
-	if metric.Text == "" {
-		return metric.Id
-	} else {
-		return metric.Text
-	}
-}
-
 type VMWare struct {
 	Url      string `toml:"url"`
 	User     string `toml:"user"`
@@ -36,17 +22,13 @@ type VMWare struct {
 	json      string
 }
 
-type Command struct {
-	Id string `toml:"id"`
-}
-
 var sampleTemplateConfig = `
 # VMWare inventory collector configuration
 # Enter the information for vCenter login account and target vm
 # 
 # example:
 #
-# url = "https://192.168.10.100/sdk"  # vCenter URL
+# url = "https://192.168.10.100/sdk"  # vCenter IP or URL
 # user = "test_user"
 # password = "P@ssword"
 # server = "w2016"                    # vm name
@@ -64,7 +46,7 @@ server = "{{ .Server }}"
 #
 # servers = ["host1", "host2"]
 
-# Additional metrics list of VMWare Managed Object. 
+# Additional metrics list of VMWare vSphere Managed Object API. 
 #
 # Notice: 
 #   The results of all added metrics are saved in the "all.json".
@@ -73,44 +55,41 @@ server = "{{ .Server }}"
 # 
 # [[metrics]]
 # 
-# id = "config"   # object key
+# id = "config"   # unique key
 # level = 0       # command level [0-2]
-# text = "config" # If not defined, use id instead
+# text = "config" # Managed Object Description
 
-[[metrics]]
+# The following commented out metrics are set by default
 
-id = "summary"
-name = "仮想マシン名"
-level = 0
-category = "VM設定"
-
-[[metrics]]
-
-id = "resourceConfig"
-name = "CPU,メモリ割り当て制限"
-level = 0
-category = "VM設定"
-
-[[metrics]]
-
-id = "guestHeartbeatStatus"
-name = "ハートビート状態"
-level = 0
-category = "VM設定"
-
-[[metrics]]
-
-id = "config"
-name = "ストレージ構成"
-level = 0
-category = "VM設定"
-
-[[metrics]]
-
-id = "guest"
-name = "ネットワーク構成"
-level = 0
-category = "VM設定"
+# [[metrics]]
+# 
+# id = "summary"
+# level = 0
+# text = "summary"
+# 
+# [[metrics]]
+# 
+# id = "resourceConfig"
+# level = 0
+# text = "resourceConfig"
+# 
+# [[metrics]]
+# 
+# id = "guestHeartbeatStatus"
+# level = 0
+# text = "guestHeartbeatStatus"
+# 
+# [[metrics]]
+# 
+# id = "config"
+# level = 0
+# text = "config"
+# 
+# [[metrics]]
+# 
+# id = "guest"
+# level = 0
+# text = "guest"
 `
 
 func (e *VMWare) Label() string {
