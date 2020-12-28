@@ -9,20 +9,19 @@ import (
 
 	"github.com/getperf/getperf2/cfg"
 	. "github.com/getperf/getperf2/common"
-	"github.com/getperf/getperf2/common/sshx"
 	"github.com/getperf/getperf2/common/telnetx"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
-func (e *Solaris) RunRemoteServer(ctx context.Context, env *cfg.RunEnv) error {
+func (e *Solaris) RunRemoteServerTelnet(ctx context.Context, env *cfg.RunEnv) error {
 	log.Info("collect remote server : ", e.Server)
 	e.datastore = filepath.Join(env.Datastore, e.Server)
 	if err := os.MkdirAll(e.datastore, 0755); err != nil {
 		return HandleError(e.errFile, err, "create log directory")
 	}
+	telnetUrl, _ := telnetx.ParseUrl(e.Url)
 	// client, err := sshConnect(e.Url, e.User, e.Password, e.SshKeyPath)
-	client, err := sshx.SshConnect(e.Url, e.User, e.Password, e.SshKeyPath)
+	client, err := telnetx.TelnetConnect(telnetUrl, e.User, e.Password)
 	if err != nil {
 		return HandleError(e.errFile, err, "connect remote server")
 	}
@@ -40,40 +39,17 @@ func (e *Solaris) RunRemoteServer(ctx context.Context, env *cfg.RunEnv) error {
 			return HandleError(e.errFile, err, "prepare inventory log")
 		}
 		defer outFile.Close()
-		if err := sshx.RunCommand(outFile, e.errFile, client, metric.Type, metric.Text); err != nil {
+		var data string
+		if metric.Type == "Cmd" || metric.Type == "" {
+			data, err = client.ExecCommand(metric.Text)
+		} else {
+			data, err = client.ExecScript(metric.Text)
+		}
+		if err != nil {
 			HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", e.Server, metric.Id))
 		}
+		outFile.Write([]byte(data))
 		log.Infof("run %s:%s,elapse %s", e.Server, metric.Id, time.Since(startTime))
 	}
 	return nil
-}
-
-func (e *Solaris) Run(ctx context.Context, env *cfg.RunEnv) error {
-	startTime := time.Now()
-	errFile, err := env.OpenLog("error.log")
-	if err != nil {
-		return errors.Wrap(err, "prepare Solaris inventory error")
-	}
-	defer errFile.Close()
-	e.errFile = errFile
-	e.Env = env
-	fmt.Println("URL:", e.Url)
-	telnetUrl, err := telnetx.ParseUrl(e.Url)
-	fmt.Println("URL2:", telnetUrl)
-	if err != nil {
-		return HandleErrorWithAlert(e.errFile, err, "check url")
-	}
-	if telnetUrl != "" {
-		err = e.RunRemoteServerTelnet(ctx, env)
-	} else {
-		err = e.RunRemoteServer(ctx, env)
-	}
-	if err != nil {
-		msg := fmt.Sprintf("run remote server '%s'", e.Server)
-		HandleErrorWithAlert(e.errFile, err, msg)
-	}
-	msg := fmt.Sprintf("Elapse %s", time.Since(startTime))
-	log.Infof("Complete Solaris inventory collection %s", msg)
-
-	return err
 }

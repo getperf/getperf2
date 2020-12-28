@@ -51,7 +51,8 @@ server = "{{ .Server }}"
 # Notice: 
 #   The results of all added metrics are saved in the "all.json".
 #
-# Reference : http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.VirtualMachine.html
+# Reference : 
+#   https://code.vmware.com/apis/968/vsphere
 # 
 # [[metrics]]
 # 

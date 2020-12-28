@@ -7,7 +7,9 @@ require (
 	github.com/Songmu/timeout v0.4.0
 	github.com/cavaliercoder/go-zabbix v0.0.0-20200608183504-1cdce1818710
 	github.com/go-resty/resty/v2 v2.3.0
+	github.com/google/goexpect v0.0.0-20200816234442-b5b77125c2c5
 	github.com/google/gops v0.3.10
+	github.com/google/goterm v0.0.0-20190703233501-fc88cf888a3f
 	github.com/gorilla/mux v1.7.4
 	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/iancoleman/strcase v0.1.1
@@ -23,7 +25,8 @@ require (
 	github.com/tidwall/gjson v1.6.0
 	github.com/urfave/cli v1.22.4
 	github.com/vmware/govmomi v0.23.0
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	github.com/ziutek/telnet v0.0.0-20180329124119-c3b780dc415b
+	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
 	golang.org/x/text v0.3.0
 	gopkg.in/yaml.v2 v2.3.0
 )
