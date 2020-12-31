@@ -30,7 +30,6 @@ func (c *ConfigInitializer) Validate() error {
 	if err := c.Common.Check(); err != nil {
 		return errors.Wrap(err, "check config")
 	}
-	log.Info(c.Common)
 	if c.Base.Template == "" {
 		return errors.New("--teplate must specifiend")
 	}

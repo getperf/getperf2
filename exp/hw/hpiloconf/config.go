@@ -51,6 +51,56 @@ server = "{{ .Server }}"
 # id = "oviewview" # unique key
 # level = 0        # command level [0-2]
 # text = "/json/overview"
+
+# [[metrics]]
+# 
+# id = "overview"
+# text = "/json/overview"
+# 
+# [[metrics]]
+# 
+# id = "license"
+# text = "/redfish/v1/Managers/1/LicenseService/1/"
+# 
+# [[metrics]]
+# 
+# id = "proc_info"
+# text = "/json/proc_info"
+# 
+# [[metrics]]
+# 
+# id = "mem_info"
+# text = "/json/mem_info"
+# 
+# [[metrics]]
+# 
+# id = "network"
+# text = "/redfish/v1/Managers/1/EthernetInterfaces/1"
+# 
+# [[metrics]]
+# 
+# id = "health_drives"
+# text = "/json/health_drives"
+# 
+# [[metrics]]
+# 
+# id = "health_phy_drives"
+# text = "/json/health_phy_drives"
+# 
+# [[metrics]]
+# 
+# id = "snmp"
+# text = "/redfish/v1/Managers/1/snmpservice/snmpalertdestinations/1"
+# 
+# [[metrics]]
+# 
+# id = "power_regulator"
+# text = "/json/power_regulator"
+# 
+# [[metrics]]
+# 
+# id = "power_summary"
+# text = "/json/power_summary"
 `
 
 func (e *HPiLO) Label() string {

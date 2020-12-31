@@ -52,7 +52,7 @@ func (e *VMWare) saveJson(ioErr io.Writer, outfile, query string) {
 }
 
 func (e *VMWare) retrieveInventory(env *cfg.RunEnv, ioErr io.Writer, vm string) {
-	for _, metric := range e.Metrics {
+	for _, metric := range metrics {
 		objectId := metric.getObjectId()
 		if metric.Level == -1 || metric.Level > env.Level || objectId == "" {
 			continue
@@ -60,23 +60,7 @@ func (e *VMWare) retrieveInventory(env *cfg.RunEnv, ioErr io.Writer, vm string) 
 		query := strcase.ToCamel(objectId)
 		e.saveJson(ioErr, objectId, query)
 	}
-	// Default extraction
-	e.saveJson(ioErr, "base_hardware", "Summary.Hardware")
-	e.saveJson(ioErr, "base_config", "Summary.Config")
-	e.saveJson(ioErr, "base_product", "Summary.Config.Product")
 }
-
-// func HandleError(w io.Writer, inErr error, message string) error {
-// 	if inErr != nil {
-// 		_, err := fmt.Fprintf(w, "%s : %s\n", message, inErr)
-// 		if err != nil {
-// 			log.Errorf("write log error : %s", err)
-// 		}
-// 		return errors.Wrap(inErr, message)
-// 	} else {
-// 		return nil
-// 	}
-// }
 
 func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 	startTime := time.Now()
@@ -137,11 +121,9 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 	// Reference: http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.VirtualMachine.html
 	pc := property.DefaultCollector(session.Client)
 	var vms []mo.HostSystem
-	// if len(e.Metrics) > 0 {
-	// 	log.Info("add metrics : ", e.Metrics)
-	// 	vmMetrics = append(vmMetrics, e.Metrics...)
-	// }
-	for _, metric := range e.Metrics {
+
+	metrics = append(metrics, e.Metrics...)
+	for _, metric := range metrics {
 		if metric.Level == -1 || metric.Level > env.Level {
 			continue
 		}

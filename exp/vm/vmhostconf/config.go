@@ -7,20 +7,6 @@ import (
 
 const Version = "0.1.4"
 
-type Metric struct {
-	Id    string `toml:"id"`
-	Level int    `toml:"level"`
-	Text  string `toml:"text"`
-}
-
-func (metric *Metric) getObjectId() string {
-	if metric.Text == "" {
-		return metric.Id
-	} else {
-		return metric.Text
-	}
-}
-
 type VMWare struct {
 	Url      string `toml:"url"`
 	User     string `toml:"user"`
@@ -77,19 +63,21 @@ server = "{{ .Server }}"
 # level = 0       # command level [0-2]
 # text = "config" # If not defined, use id instead
 
-[[metrics]]
+# The following commented out metrics are set by default
 
-id = "summary"
-name = "バージョン"
-level = 0
-category = "OSリリース"
-
-[[metrics]]
-
-id = "config"
-name = "ネットワーク"
-level = 0
-category = "ネットワーク"
+# [[metrics]]
+# 
+# id = "summary"
+# name = "バージョン"
+# level = 0
+# category = "OSリリース"
+# 
+# [[metrics]]
+# 
+# id = "config"
+# name = "ネットワーク"
+# level = 0
+# category = "ネットワーク"
 
 `
 
