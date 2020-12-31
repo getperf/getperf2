@@ -68,16 +68,14 @@ server = "{{ .Server }}"
 # [[metrics]]
 # 
 # id = "summary"
-# name = "バージョン"
 # level = 0
-# category = "OSリリース"
+# text = "summary"
 # 
 # [[metrics]]
 # 
 # id = "config"
-# name = "ネットワーク"
 # level = 0
-# category = "ネットワーク"
+# text = "config"
 
 `
 
