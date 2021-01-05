@@ -3,11 +3,16 @@ package windowsconf
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"time"
 
-	// ps "github.com/hnakamur/go-powershell"
 	"github.com/getperf/getperf2/cfg"
+	. "github.com/getperf/getperf2/common"
+	ps "github.com/hnakamur/go-powershell"
+	"github.com/labstack/gommon/log"
 	// . "github.com/getperf/getperf2/common"
 )
 
@@ -15,6 +20,40 @@ import (
 // 	defaultTimeoutDuration = 300 * time.Second
 // 	timeoutKillAfter       = 1 * time.Second
 // )
+
+var powershellCodeRemote = `# Windows remote invetory collecting script
+
+Param(
+    [string]$log_dir
+  , [string]$ip
+  , [string]$server
+  , [string]$user
+  , [string]$password
+)
+$log_dir = Convert-Path $log_dir
+$secure   = ConvertTo-SecureString $password -asplaintext -force
+$cred     = New-Object System.Management.Automation.PsCredential $user, $secure
+
+$ErrorActionPreference = "Stop"
+$session = $null
+try {
+    $script:session  = New-PSSession $ip -Credential $cred
+} catch [Exception] {
+    Write-Error "$error"
+    exit 1
+}
+$ErrorActionPreference = "Continue"
+
+$log_dir = Convert-Path $log_dir
+
+{{range $i, $v := .}}
+echo TestId::{{$v.Id}}
+$log_path = Join-Path $log_dir "{{$v.Id}}"
+Invoke-Command -Session $session  -ScriptBlock { {{$v.Text}} } | Out-File $log_path -Encoding UTF8
+{{end}}
+
+Remove-PSSession $session
+`
 
 func convCommandLine(str, nlcode string) string {
 	return strings.NewReplacer(
@@ -26,59 +65,46 @@ func convCommandLine(str, nlcode string) string {
 }
 
 func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Server) error {
+	if runtime.GOOS != "windows" {
+		return fmt.Errorf("windows powershell environment only")
+	}
+	startTime := time.Now()
+	if env.DryRun {
+		return e.writeScript(powershellCodeRemote, os.Stdout, env)
+	}
 	e.datastore = filepath.Join(env.Datastore, sv.Server)
-	fmt.Println("RUN ", sv)
-	// if err := os.MkdirAll(e.datastore, 0755); err != nil {
-	// 	return HandleError(e.errFile, err, "create log directory")
-	// }
+	if err := os.MkdirAll(e.datastore, 0755); err != nil {
+		return HandleError(e.errFile, err, "create log directory")
+	}
+	if err := e.CreateScript(powershellCodeRemote,
+		"get_windows_inventory_remote.ps1",
+		env); err != nil {
+		return HandleError(e.errFile, err, "prepare script")
+	}
+	shell, err := ps.New()
+	if err != nil {
+		return HandleError(e.errFile, err, "prepare winrm session")
+	}
+	defer shell.Exit()
 
-	// endpoint := winrm.NewEndpoint(sv.Url, 5985, false, false, nil, nil, nil, 0)
-	// winrm.DefaultParameters.TransportDecorator = func() winrm.Transporter {
-	// 	return &winrmntlm.Transport{
-	// 		Username: sv.User,
-	// 		Password: sv.Password,
-	// 	}
-	// }
-	// // // Note, username/password pair in the NewClientWithParameters call is ignored
-	// client, err := winrm.NewClientWithParameters(endpoint, "", "", winrm.DefaultParameters)
-	// //client, err := winrm.NewClient(endpoint, sv.User, sv.Password)
-	// if err != nil {
-	// 	return HandleError(e.errFile, err, fmt.Sprintf("run %s", sv.Server))
-	// }
+	outFile, err := env.OpenLog("output.log")
+	if err != nil {
+		return HandleError(e.errFile, err, "prepare shell output log")
+	}
+	defer outFile.Close()
 
-	// for _, metric := range append(metrics, e.Metrics...) {
-	// 	if metric.Level == -1 || metric.Level > env.Level {
-	// 		continue
-	// 	}
-	// 	if metric.Id == "" || metric.Text == "" {
-	// 		continue
-	// 	}
-	// 	startTime := time.Now()
-	// 	outFile, err := env.OpenServerLog(sv.Server, metric.Id)
-	// 	if err != nil {
-	// 		return HandleError(e.errFile, err, "prepare inventory log")
-	// 	}
-	// 	defer outFile.Close()
-	// 	var cmd string
-	// 	if metric.Type == "Cmdlet" {
-	// 		cmd = winrm.Powershell(metric.Text)
-	// 	} else if metric.Type == "Cmd" {
-	// 		cmd = fmt.Sprintf("cmd.exe /c \"%s\"", metric.Text)
-	// 	} else {
-	// 		cmd = metric.Text
-	// 	}
-	// 	fmt.Fprintf(e.errFile, "run : %s:%s\n", sv.Server, metric.Id)
-	// 	if _, err = client.Run(cmd, outFile, e.errFile); err != nil {
-	// 		// if strings.Contains(fmt.Sprintf("%s", err), "http error 401") {
-	// 		msg := fmt.Sprintf("%s", err)
-	// 		if strings.Contains(msg, "error") ||
-	// 			strings.Contains(msg, "connection attempt failed") {
-	// 			return HandleError(e.errFile, err, fmt.Sprintf("run %s", sv.Server))
-	// 		}
-	// 		HandleError(e.errFile, err, fmt.Sprintf("run %s:%s", sv.Server, metric.Id))
-	// 	}
-	// 	log.Debugf("run %s:%s,elapse %s", sv.Server, metric.Id, time.Since(startTime))
-	// }
+	cmd := fmt.Sprintf(
+		"powershell -ExecutionPolicy RemoteSigned %s %s %s %s %s %s",
+		e.ScriptPath, e.datastore, sv.Url, sv.Server, sv.User, sv.Password)
+	stdout, err := shell.Exec(cmd)
+	// stdout, err := shell.Exec("powershell -ExecutionPolicy RemoteSigned .\\get_windows_spec.ps1 .\\log 192.168.0.20 w2019 administrator P@ssw0rd20A")
+	if err != nil {
+		HandleError(e.errFile, err, "exec powershell script")
+	}
+	outFile.Write([]byte(stdout))
+
+	msg := fmt.Sprintf("Elapse %s", time.Since(startTime))
+	log.Infof("Complete Windows inventory collection %s", msg)
 
 	return nil
 }

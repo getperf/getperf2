@@ -12,6 +12,7 @@ require (
 	github.com/google/goterm v0.0.0-20190703233501-fc88cf888a3f
 	github.com/gorilla/mux v1.7.4
 	github.com/hashicorp/go-cleanhttp v0.5.1
+	github.com/hnakamur/go-powershell v0.1.0
 	github.com/iancoleman/strcase v0.1.1
 	github.com/kardianos/minwinsvc v1.0.0
 	github.com/labstack/gommon v0.3.0
@@ -27,6 +28,6 @@ require (
 	github.com/vmware/govmomi v0.23.0
 	github.com/ziutek/telnet v0.0.0-20180329124119-c3b780dc415b
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
-	golang.org/x/text v0.3.0
+	golang.org/x/text v0.3.2
 	gopkg.in/yaml.v2 v2.3.0
 )

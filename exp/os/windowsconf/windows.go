@@ -14,6 +14,7 @@ import (
 	"github.com/Songmu/timeout"
 	"github.com/getperf/getperf2/cfg"
 	. "github.com/getperf/getperf2/common"
+	ps "github.com/hnakamur/go-powershell"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -40,9 +41,9 @@ Invoke-Command  -ScriptBlock { {{$v.Text}} } | Out-File $log_path -Encoding UTF8
 {{end}}
 `
 
-func (e *Windows) writeScript(doc io.Writer, env *cfg.RunEnv) error {
+func (e *Windows) writeScript(templateCode string, doc io.Writer, env *cfg.RunEnv) error {
 	// tmpl, err := template.ParseFiles("powershell.tpl")
-	tmpl, err := template.New("windowsconf").Parse(powershellCode)
+	tmpl, err := template.New("windowsconf").Parse(templateCode)
 	if err != nil {
 		return errors.Wrap(err, "failed read template")
 	}
@@ -51,8 +52,11 @@ func (e *Windows) writeScript(doc io.Writer, env *cfg.RunEnv) error {
 		if metric.Level == -1 || metric.Level > env.Level {
 			continue
 		}
-		if metric.Id == "" || metric.Text == "" || metric.Type != "Cmdlet" {
+		if metric.Id == "" || metric.Text == "" {
 			continue
+		}
+		if metric.Type == "Cmd" {
+			metric.Text = fmt.Sprintf("cmd.exe /c \"%s\"", metric.Text)
 		}
 		log.Debugf("add test item %s:%d:%d", metric.Id, metric.Level, env.Level)
 		filteredMetrics = append(filteredMetrics, metric)
@@ -63,16 +67,17 @@ func (e *Windows) writeScript(doc io.Writer, env *cfg.RunEnv) error {
 	return nil
 }
 
-func (e *Windows) CreateScript(env *cfg.RunEnv) error {
+func (e *Windows) CreateScript(templateCode string, script string, env *cfg.RunEnv) error {
 	log.Info("create temporary log dir for test ", env.Datastore)
-	e.ScriptPath = filepath.Join(env.Datastore, "get_windows_inventory.ps1")
+	// e.ScriptPath = filepath.Join(env.Datastore, "get_windows_inventory.ps1")
+	e.ScriptPath = filepath.Join(env.Datastore, script)
 	outFile, err := os.OpenFile(e.ScriptPath,
 		os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return errors.Wrap(err, "failed create script")
 	}
 	defer outFile.Close()
-	e.writeScript(outFile, env)
+	e.writeScript(templateCode, outFile, env)
 	return nil
 }
 
@@ -130,64 +135,78 @@ func (e *Windows) RunLocalServer(ctx context.Context, env *cfg.RunEnv) error {
 	if runtime.GOOS != "windows" {
 		return fmt.Errorf("windows powershell environment only")
 	}
-	if err := e.RunCommands(ctx, env); err != nil {
-		return errors.Wrap(err, "run external command")
+	// if err := e.RunCommands(ctx, env); err != nil {
+	// 	return errors.Wrap(err, "run external command")
+	// }
+	if env.DryRun {
+		return e.writeScript(powershellCode, os.Stdout, env)
 	}
 	startTime := time.Now()
-	if env.DryRun {
-		return e.writeScript(os.Stdout, env)
+	e.datastore = filepath.Join(env.Datastore, e.Server)
+	if err := os.MkdirAll(e.datastore, 0755); err != nil {
+		return HandleError(e.errFile, err, "create log directory")
 	}
-	if err := e.CreateScript(env); err != nil {
-		return errors.Wrap(err, "prepare windows inventory script")
+	if err := e.CreateScript(powershellCode, "get_windows_inventory.ps1", env); err != nil {
+		return HandleError(e.errFile, err, "prepare script")
 	}
-	cmdPowershell := []string{
-		// Get-NetConnectionProfileなど、一部コマンドレットの実行で、
-		// "プロバイダーによる読み込みエラーです" エラーが発生。
-		// 以下の記事を参照し、絶対パスで 64bit 版 PowerShell を指定して
-		// も同様のエラーが発生する。原因、調査中。
-		// Get-WindowsFeature コマンドレットでも類似の問題発生。
+	// cmdPowershell := []string{
+	// 	// Get-NetConnectionProfileなど、一部コマンドレットの実行で、
+	// 	// "プロバイダーによる読み込みエラーです" エラーが発生。
+	// 	// 以下の記事を参照し、絶対パスで 64bit 版 PowerShell を指定して
+	// 	// も同様のエラーが発生する。原因、調査中。
+	// 	// Get-WindowsFeature コマンドレットでも類似の問題発生。
 
-		// https://stackoverflow.com/questions/28156066/how-to-resolve-get-netconnectionprofile-provider-load-failure-on-x86-powershel
+	// 	// https://stackoverflow.com/questions/28156066/how-to-resolve-get-netconnectionprofile-provider-load-failure-on-x86-powershel
 
-		// powershellCmd,
-		"powershell",
-		e.ScriptPath,
-		env.Datastore,
+	// 	// powershellCmd,
+	// 	"powershell",
+	// 	e.ScriptPath,
+	// 	env.Datastore,
+	// }
+	shell, err := ps.New()
+	if err != nil {
+		return HandleError(e.errFile, err, "prepare winrm session")
 	}
+	defer shell.Exit()
+
 	outFile, err := env.OpenLog("output.log")
 	if err != nil {
-		return errors.Wrap(err, "prepare windows inventory log")
+		return HandleError(e.errFile, err, "prepare shell output log")
 	}
 	defer outFile.Close()
 
-	errFile, err := env.OpenLog("error.log")
+	cmd := fmt.Sprintf(
+		"powershell -ExecutionPolicy RemoteSigned %s %s",
+		e.ScriptPath, e.datastore)
+	stdout, err := shell.Exec(cmd)
 	if err != nil {
-		return errors.Wrap(err, "prepare windows inventory error")
+		HandleError(e.errFile, err, "exec powershell script")
 	}
-	defer errFile.Close()
+	outFile.Write([]byte(stdout))
 
-	cmd := exec.Command(cmdPowershell[0], cmdPowershell[1:]...)
-	cmd.Stdout = outFile
-	cmd.Stderr = errFile
-	tio := &timeout.Timeout{
-		Cmd:       cmd,
-		Duration:  defaultTimeoutDuration,
-		KillAfter: timeoutKillAfter,
-	}
-	if env.Timeout != 0 {
-		tio.Duration = time.Duration(env.Timeout) * time.Second
-	}
-	exit, err := tio.RunContext(ctx)
-	if err != nil {
-		return errors.Wrap(err, "run windows inventory process")
-	}
-	// exit := <-ch
-	msg := fmt.Sprintf("RC:%d,Signal:%t,Elapse %s",
-		exit.GetChildExitCode(), exit.Signaled, time.Since(startTime))
-	if exit.GetChildExitCode() != 0 || exit.Signaled {
-		log.Error(msg)
-		return errors.New(msg)
-	}
+	// cmd := exec.Command(cmdPowershell[0], cmdPowershell[1:]...)
+	// cmd.Stdout = outFile
+	// cmd.Stderr = errFile
+	// tio := &timeout.Timeout{
+	// 	Cmd:       cmd,
+	// 	Duration:  defaultTimeoutDuration,
+	// 	KillAfter: timeoutKillAfter,
+	// }
+	// if env.Timeout != 0 {
+	// 	tio.Duration = time.Duration(env.Timeout) * time.Second
+	// }
+	// exit, err := tio.RunContext(ctx)
+	// if err != nil {
+	// 	return errors.Wrap(err, "run windows inventory process")
+	// }
+	// // exit := <-ch
+	// msg := fmt.Sprintf("RC:%d,Signal:%t,Elapse %s",
+	// 	exit.GetChildExitCode(), exit.Signaled, time.Since(startTime))
+	// if exit.GetChildExitCode() != 0 || exit.Signaled {
+	// 	log.Error(msg)
+	// 	return errors.New(msg)
+	// }
+	msg := fmt.Sprintf("Elapse %s", time.Since(startTime))
 	log.Infof("Complete Windows inventory collection %s", msg)
 
 	return nil
@@ -228,9 +247,9 @@ func (e *Windows) Run(ctx context.Context, env *cfg.RunEnv) error {
 // 	}
 // 	// startTime := time.Now()
 // 	if env.DryRun {
-// 		return e.writeScript(os.Stdout, env)
+// 		return e.writeScript(powershellCode, os.Stdout, env)
 // 	}
-// 	if err := e.CreateScript(env); err != nil {
+// 	if err := e.CreateScript(powershellCode, "get_windows_inventory.ps1", env); err != nil {
 // 		return errors.Wrap(err, "prepare windows inventory script")
 // 	}
 // 	cmdPowershell := []string{
