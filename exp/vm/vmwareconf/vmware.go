@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/getperf/getperf2/cfg"
@@ -31,6 +32,19 @@ const (
 // Reference : http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.VirtualMachine.html
 
 var vmMetrics = []string{}
+
+func parseUrl(uri string) (string, error) {
+	if !strings.HasPrefix(uri, "http://") &&
+		!strings.HasPrefix(uri, "https://") {
+		uri = "https://" + uri + "/sdk"
+		log.Info("convert url : ", uri)
+	}
+	_, err := url.Parse(uri)
+	if err != nil {
+		return uri, errors.Wrapf(err, "parse url %s", uri)
+	}
+	return uri, nil
+}
 
 func (e *VMWare) saveJson(ioErr io.Writer, outfile, query string) {
 	value := gjson.Get(e.json, query).String()
@@ -64,6 +78,10 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 	}
 	defer errFile.Close()
 
+	e.Url, err = parseUrl(e.Url)
+	if err != nil {
+		return HandleError(errFile, err, "prepare rest url")
+	}
 	urlConfig, err := url.Parse(e.Url)
 	if err != nil {
 		return HandleError(errFile, err, "parse vcenter url")
