@@ -97,11 +97,8 @@ func (c *Sender) NewAgentDatastore(hostName string) *agent.Datastore {
 func (c *Sender) Run() error {
 	hostName, err := common.GetHostname()
 	if err != nil {
-		log.Errorf("get hostname for initialize config %s", err)
-		hostName = "UnkownHost"
+		return errors.Wrap(err, "sending inventory zip")
 	}
-	log.Info("run sender", c)
-
 	agentConfig := c.NewAgentConfig(hostName)
 	agentDatastore := c.NewAgentDatastore(hostName)
 	zipFile := agentDatastore.ZipFile(hostName)
