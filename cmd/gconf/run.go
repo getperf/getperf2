@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"os"
+	"time"
 
 	// . "github.com/getperf/getperf2/common"
 	"github.com/getperf/getperf2/cfg"
@@ -15,6 +16,7 @@ import (
 var env = &cfg.RunEnv{
 	Filter:   &cfg.FilterConfig{},
 	Retrieve: &cfg.RetrieveConfig{},
+	CurrTime: time.Now(),
 }
 
 func init() {
@@ -31,6 +33,11 @@ func init() {
 				Name:        "dryrun, d",
 				Usage:       "use dry run mode",
 				Destination: &env.DryRun,
+			},
+			&cli.BoolFlag{
+				Name:        "send, s",
+				Usage:       "send gathering data using cacti agent",
+				Destination: &env.Send,
 			},
 			cli.IntFlag{
 				Name:        "level, l",
@@ -57,6 +64,11 @@ func init() {
 				Name:        "keyword-testitem",
 				Usage:       "filtering keyword of test itemss",
 				Destination: &env.Filter.KeywordTestItem,
+			},
+			&cli.StringFlag{
+				Name:        "agent-home",
+				Usage:       "cacti agent home",
+				Destination: &env.AgentHome,
 			},
 		},
 		Action: func(c *cli.Context) error {

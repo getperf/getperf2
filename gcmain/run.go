@@ -72,5 +72,14 @@ func (c *InventoryExecuter) Run() error {
 	if err != nil {
 		return errors.Wrap(err, "read server config file")
 	}
-	return server.Run(ctx, c.Env)
+	if err := server.Run(ctx, c.Env); err != nil {
+		return err
+	}
+	if c.Env.Send {
+		sender := NewSender(scenario().Label(), c.Env)
+		if err := sender.Run(); err != nil {
+			return errors.Wrap(err, "end processing")
+		}
+	}
+	return nil
 }

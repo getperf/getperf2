@@ -1,8 +1,10 @@
 package cfg
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	. "github.com/getperf/getperf2/common"
 	"github.com/pkg/errors"
@@ -22,10 +24,13 @@ const (
 type RunEnv struct {
 	Level     int
 	DryRun    bool
+	Send      bool
 	Datastore string
 	LocalExec bool
 	Timeout   int
 	LogLevel  int
+	CurrTime  time.Time
+	AgentHome string
 	Retrieve  *RetrieveConfig
 	Filter    *FilterConfig
 	Status    RunStatus
@@ -42,8 +47,16 @@ func (e *RunEnv) Check() error {
 	} else {
 		if ok, _ := CheckDirectory(e.Datastore); !ok {
 			return os.MkdirAll(e.Datastore, 0755)
-			// } else {
-			// 	return CheckDirectoryIsNull(e.Datastore)
+		}
+	}
+	if e.Send {
+		if e.AgentHome == "" {
+			e.AgentHome = GetParentPath(GetBaseDir(), 1)
+		}
+		agentBackup := filepath.Join(e.AgentHome, "_bk")
+		if exit, _ := CheckDirectory(agentBackup); exit != true {
+			return fmt.Errorf("not found agent backup directory %s",
+				agentBackup)
 		}
 	}
 	return nil
