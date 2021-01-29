@@ -207,7 +207,7 @@ func (e *Windows) RunLocalServer(ctx context.Context, env *cfg.RunEnv) error {
 	// 	return errors.New(msg)
 	// }
 	msg := fmt.Sprintf("Elapse %s", time.Since(startTime))
-	log.Infof("Complete Windows inventory collection %s", msg)
+	log.Infof("Complete Windows local inventory collection %s", msg)
 
 	return nil
 }
