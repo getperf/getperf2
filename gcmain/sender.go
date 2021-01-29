@@ -22,9 +22,10 @@ type Sender struct {
 	Platform  string
 }
 
-var timeout = 30
-
 func convertInventoryPlatform(platform string) string {
+	if i := strings.Index(platform, " "); i > 0 {
+		platform = platform[:i]
+	}
 	return platform + "Conf"
 }
 
@@ -94,14 +95,12 @@ func (c *Sender) NewAgentDatastore(hostName string) *agent.Datastore {
 }
 
 func (c *Sender) Run() error {
-	// ctx, cancel := MakeContext(timeout)
-	// defer cancel()
 	hostName, err := common.GetHostname()
 	if err != nil {
 		log.Errorf("get hostname for initialize config %s", err)
 		hostName = "UnkownHost"
 	}
-	log.Info("run sender")
+	log.Info("run sender", c)
 
 	agentConfig := c.NewAgentConfig(hostName)
 	agentDatastore := c.NewAgentDatastore(hostName)
