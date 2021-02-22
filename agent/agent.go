@@ -273,7 +273,9 @@ func (config *Config) SendCollectorDataAll(datastore *Datastore) error {
 
 func (config *Config) PurgeData(task *Task, datastore *Datastore) error {
 	saveHour := config.Schedule.SaveHour
-	logDir := config.OutDir
+	// logDir := config.OutDir
+	logDir := filepath.Join(config.OutDir, datastore.StatName)
+
 	purgeTime := datastore.StartTime.Add(-1 * time.Hour * time.Duration(saveHour))
 	dateDirs, err := ioutil.ReadDir(logDir)
 	if err != nil {
