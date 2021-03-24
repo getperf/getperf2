@@ -57,23 +57,24 @@ func (e *HPiLO) Run(ctx context.Context, env *cfg.RunEnv) error {
 		return HandleError(errFile, err, "init rest client")
 	}
 
-	for _, command := range commands {
-		if command.Level > env.Level {
+	metrics = append(metrics, e.Metrics...)
+	for _, metric := range metrics {
+		if metric.Level > env.Level {
 			continue
 		}
-		if command.Id == "" {
+		if metric.Id == "" {
 			continue
 		}
-		requestUrl := url + command.Text
+		requestUrl := url + metric.Text
 		resp, err := client.R().
-			SetOutput(command.Id).
+			SetOutput(metric.Id).
 			Get(requestUrl)
 		if err != nil {
-			return HandleError(errFile, err, command.Text)
+			return HandleError(errFile, err, metric.Text)
 		}
 		if code := resp.StatusCode(); code >= 400 {
 			err := fmt.Errorf("get:%s,status code:%d", requestUrl, code)
-			HandleError(errFile, err, command.Id)
+			HandleError(errFile, err, metric.Id)
 		}
 	}
 	log.Infof("run %s:elapse %s", e.Server, time.Since(startTime))

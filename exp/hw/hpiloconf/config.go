@@ -14,7 +14,7 @@ type HPiLO struct {
 	Insecure bool   `toml:"insecure"`
 	Server   string `toml:"server"`
 
-	Metrics []string `toml:"metrics"`
+	Metrics []*Metric `toml:"metrics"`
 
 	vmName    string
 	datastore string
