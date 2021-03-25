@@ -57,7 +57,7 @@ func (e *HPiLO) Run(ctx context.Context, env *cfg.RunEnv) error {
 		return HandleError(errFile, err, "init rest client")
 	}
 
-	metrics = append(metrics, e.Metrics...)
+	// metrics = append(metrics, e.Metrics...)
 	for _, metric := range metrics {
 		if metric.Level > env.Level {
 			continue
