@@ -11,6 +11,7 @@ import (
 	_ "github.com/getperf/getperf2/exp/monitor/zabbixconf"
 	_ "github.com/getperf/getperf2/exp/os/linuxconf"
 	_ "github.com/getperf/getperf2/exp/os/solarisconf"
+	_ "github.com/getperf/getperf2/exp/os/aixconf"
 	_ "github.com/getperf/getperf2/exp/os/windowsconf"
 	_ "github.com/getperf/getperf2/exp/vm/vmhostconf"
 	_ "github.com/getperf/getperf2/exp/vm/vmwareconf"
