@@ -11,47 +11,39 @@ import (
 const Version = "0.1.4"
 
 type AIX struct {
-    Server    string    `toml:"server"`
-    LocalExec bool      `toml:"local_exec"`
-    Servers   []*Server `toml:"servers"`
-    Metrics   []*Metric `toml:"metrics"`
-
-    Env          *cfg.RunEnv
-    errFile      io.Writer
-    remoteServer string
-    datastore    string
-}
-
-type Server struct {
     Server     string `toml:"server"`
     Url        string `toml:"url"`
     User       string `toml:"user"`
     Password   string `toml:"password"`
     SshKeyPath string `toml:"ssh_key"`
     Insecure   bool   `toml:"insecure"`
+
+    Metrics []*Metric `toml:"metrics"`
+
+    Env       *cfg.RunEnv
+    errFile   io.Writer
+    datastore string
 }
 
 var sampleTemplateConfig = `
 # AIX server inventory collector configuration
-# When collecting the inventory of AIX platform, execute it locally.
-# Therefore, no template setting is required
+# Enter the information for AIX login account
+# 
+# example:
+#
+# url = "192.168.10.100"
+# user = "test_user"
+# password = "P@ssword"
+# server = "aix7"
 
+url = "{{ .Url }}"
+user = "{{ .User }}"
+password = "{{ .Password }}"
+insecure = true
 server = "{{ .Server }}"
-local_exec = true
 
 # The following parameters are optional
 
-# Enter the information for login account of remote AIX server
-# 
-# example:
-# 
-# [[servers]]
-# 
-# server = "aix1"    # server name
-# url = "192.168.10.1"  # server address, example: 192.168.0.1 , 192.168.0.1:22
-# user = "test_user"
-# password = "P@ssword"
-# ssh_key = ""          # ssh private key path, ignore if it not set
 
 # Describe the additional command list. Added to the default command list for
 # AIX inventory scenarios. The text parameter using escape codes such as
@@ -62,8 +54,8 @@ local_exec = true
 # [[metrics]]
 # 
 # id = "oracle_module"   # unique key
-# level = 0      # command level [0-2]
-# type = "Cmd"   # "Cmd":single command, "Script":multi line commands
+# level = 0    # command level [0:Default,1,2]
+# type = "Cmd" # "Cmd":single command(Defalut), "Script":multi line commands
 # text = '''
 # ls /home/oracle/"
 # '''
@@ -202,10 +194,11 @@ category = "ネットワーク"
 text = '''
 ifconfig -a
 '''
+
 `
 
 func (e *AIX) Label() string {
-    return "AIX"
+    return "aix"
 }
 
 func (e *AIX) Config() string {
