@@ -94,7 +94,7 @@ func (e *Windows) RunRemoteServer(ctx context.Context, env *cfg.RunEnv, sv *Serv
 	defer outFile.Close()
 
 	cmd := fmt.Sprintf(
-		"powershell -ExecutionPolicy RemoteSigned %s %s %s %s %s %s",
+		"powershell -ExecutionPolicy RemoteSigned \"%s %s %s %s %s '%s'\"",
 		e.ScriptPath, e.datastore, sv.Url, sv.Server, sv.User, sv.Password)
 	stdout, err := shell.Exec(cmd)
 	// stdout, err := shell.Exec("powershell -ExecutionPolicy RemoteSigned .\\get_windows_spec.ps1 .\\log 192.168.0.20 w2019 administrator P@ssw0rd20A")
