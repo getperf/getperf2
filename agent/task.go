@@ -25,6 +25,7 @@ type Task struct {
 	Status      ProcMode /**< Process status */
 	StatTimeout int
 
+	// StartTime time.Time /**< Start time(UTC) */
 	StartTime time.Time /**< Start time(UTC) */
 	EndTime   time.Time /**< End time(UTC) */
 

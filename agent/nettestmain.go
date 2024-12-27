@@ -75,12 +75,12 @@ func RunNettest(ctx context.Context, argv []string, stdout, stderr io.Writer) er
 	}
 
 	if u.Scheme == "https" {
-		server.TLSConfig, err = ConfigToTLSConfig(cfg)
+		server.TLSConfig, err = MakeTLSConfigClientAuth(cfg)
 		if err != nil {
 			return errors.Wrap(err, "load tls config")
 		}
 		server.TLSConfig.GetConfigForClient = func(*tls.ClientHelloInfo) (*tls.Config, error) {
-			return ConfigToTLSConfig(cfg)
+			return MakeTLSConfigClientAuth(cfg)
 		}
 		if err := server.ListenAndServeTLS("", ""); err != nil {
 			return errors.Wrap(err, "exporter listen and serve")

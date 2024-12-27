@@ -23,14 +23,25 @@ func TestGetTSLConfig(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(u.Scheme)
-
 }
 
-func TestConfigToTLSConfig(t *testing.T) {
+func TestMakeTLSConfigClientAuth(t *testing.T) {
 	config := NewConfig("../testdata/ptune", NewConfigEnv())
 	config.InitAgent()
 	config.ParseConfigFile(config.SvParamFile)
-	tlsConfig, err := ConfigToTLSConfig(config)
+	tlsConfig, err := MakeTLSConfigClientAuth(config)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(tlsConfig)
+}
+
+func TestMakeTLSConfigServerAuth(t *testing.T) {
+	t.Skip("Server TLS Config")
+	config := NewConfig("../testdata/ptune-base-3.0", NewConfigEnv())
+	config.InitAgent()
+	config.ParseConfigFile(config.SvParamFile)
+	tlsConfig, err := MakeTLSConfigServerAuth(config)
 	if err != nil {
 		t.Error(err)
 	}

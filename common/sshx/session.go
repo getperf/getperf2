@@ -38,7 +38,7 @@ func getSshKey(keypath string) (ssh.Signer, error) {
 	return key, nil
 }
 
-func parseSshUrl(uri string) (string, string, error) {
+func ParseSshUrl(uri string) (string, string, error) {
 	var ip, port string
 	if !strings.HasPrefix(uri, "ssh://") {
 		uri = "ssh://" + uri
@@ -56,7 +56,7 @@ func parseSshUrl(uri string) (string, string, error) {
 }
 
 func SshConnect(url, user, pass, keypath string) (*ssh.Client, error) {
-	ip, port, err := parseSshUrl(url)
+	ip, port, err := ParseSshUrl(url)
 	if err != nil {
 		return nil, errors.Wrap(err, "prepare ssh connect")
 	}

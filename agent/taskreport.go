@@ -2,23 +2,34 @@ package agent
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	yaml "gopkg.in/yaml.v2"
 )
 
+type JSONTime time.Time
+
+func (t JSONTime) MarshalJSON() ([]byte, error) {
+	// stamp := fmt.Sprintf("\"%s\"", time.Time(t).Format("2006-01-02T15:04:05"))
+	stamp := fmt.Sprintf("\"%s\"", time.Time(t).Format(time.RFC3339))
+	return []byte(stamp), nil
+}
+
 type ReportTaskTime struct {
 	Start time.Time
 	End   time.Time
+	// Start JSONTime
+	// End   JSONTime
 }
 
 type ReportTaskJob struct {
-	Id     int
-	Out    string
-	Cmd    string
-	Start  time.Time
-	End    time.Time
+	Id    int
+	Out   string
+	Cmd   string
+	Start time.Time
+	End   time.Time
+	// Start  JSONTime
+	// End    JSONTime
 	Pid    int
 	Rc     int
 	Error  string
@@ -36,12 +47,13 @@ func (t *Task) MakeReportTaskJobs() []ReportTaskJob {
 	for seq, taskJob := range t.TaskJobs {
 		// コマンドラインに空白があると80桁で改行してしまうため、空白を除く
 		// https://github.com/go-yaml/yaml/issues/348
-		cmdFix := strings.Replace(taskJob.CmdLine, " ", "", -1)
+		// cmdFix := strings.Replace(taskJob.CmdLine, " ", "", -1)
 
 		report := ReportTaskJob{
-			Id:    seq + 1,
-			Out:   taskJob.Job.Ofile,
-			Cmd:   cmdFix,
+			Id:  seq + 1,
+			Out: taskJob.Job.Ofile,
+			// Cmd:   cmdFix,
+			Cmd:   taskJob.CmdLine,
 			Start: taskJob.StartTime,
 			End:   taskJob.EndTime,
 		}

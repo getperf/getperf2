@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chzyer/readline"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -214,11 +215,12 @@ func GetCurrentTime(sec int, dateFormat DateFormat) string {
 }
 
 // gpfDGetTimeString は指定したフォーマット形式で時刻を変換します。
-//    GPF_DATE_FORMAT_DEFAULT         0
-//    GPF_DATE_FORMAT_YYYYMMDD        1
-//    GPF_DATE_FORMAT_HHMISS          2
-//    GPF_DATE_FORMAT_YYYYMMDD_HHMISS 3
-//    GPF_DATE_FORMAT_DIR             4
+//
+//	GPF_DATE_FORMAT_DEFAULT         0
+//	GPF_DATE_FORMAT_YYYYMMDD        1
+//	GPF_DATE_FORMAT_HHMISS          2
+//	GPF_DATE_FORMAT_YYYYMMDD_HHMISS 3
+//	GPF_DATE_FORMAT_DIR             4
 func GetTimeString(dateFormat DateFormat, t time.Time) string {
 	var format string
 	switch dateFormat {
@@ -271,3 +273,23 @@ func SetLogLevel(level int) error {
 // func (config Config)CheckDiskUtil() (bool, error) {
 // 	return true, nil
 // }
+
+// ReadLineは、コンソールにプロンプトを表示し、キー入力した行を取得します。
+func ReadLine(prompt, defaultValue string) (string, error) {
+	if defaultValue != "" {
+		prompt += fmt.Sprintf(" [%s]", defaultValue)
+	}
+	rl, err := readline.New(prompt + " :")
+	if err != nil {
+		return "", errors.Wrap(err, "read line")
+	}
+	defer rl.Close()
+	readLine, err := rl.Readline()
+	if err != nil {
+		return "", errors.Wrap(err, "read line")
+	}
+	if readLine == "" {
+		readLine = defaultValue
+	}
+	return readLine, nil
+}

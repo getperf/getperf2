@@ -117,7 +117,8 @@ func (c *CommandInfo) ExecCommandRedirectWithContext(ctx context.Context) error 
 	}
 	exitCode = exitStatus.GetChildExitCode()
 	if exitCode != 0 {
-		log.Error("exit [", cmd.ProcessState.Pid(), "] rc=", exitCode)
+		// log.Error("exit [", cmd.ProcessState.Pid(), "] rc=", exitCode)
+		log.Errorf("exit [%d] rc=%d, cmd=%s", cmd.ProcessState.Pid(), exitCode, cmd)
 	}
 	c.Executed = true
 	c.Pid = cmd.ProcessState.Pid()
@@ -160,21 +161,17 @@ func (c *CommandInfo) ExecCommandNoRedirectWithContext(ctx context.Context) erro
 	exitCode = exitStatus.GetChildExitCode()
 	if exitCode != 0 {
 		log.Info("exit status : ", exitStatus.IsTimedOut())
-		log.Info("exit stdOut : ", stdOut)
-		log.Info("exit stdErr : ", stdErr)
+		log.Info("exit stdOut : ", decodeBytes([]byte(stdOut)))
+		log.Info("exit stdErr : ", decodeBytes([]byte(stdErr)))
 	}
-	log.Debug("exec command wait")
 	c.Executed = true
 	log.Debug("exec command end")
 	c.Pid = cmd.ProcessState.Pid()
 	c.ExitCode = exitCode
-	log.Debug("exec command end")
 	c.Status = cmd.ProcessState.String()
-	log.Debug("EXEC REDIRECT OUT : ", outbuf)
-	log.Debug("EXEC REDIRECT OUT2: ", decodeBytes(outbuf.Bytes()))
 	results := strings.Join([]string{stdOut, stdErr}, "")
 	c.OutBuf = decodeBytes([]byte(results))
-	log.Info("results : ", c.OutBuf)
+	log.Debug("exec command decoded result:", c.OutBuf)
 	// c.OutBuf = decodeBytes(stdOut)
 	return err
 }

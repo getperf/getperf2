@@ -1,0 +1,39 @@
+test5 ログ出力修正
+TODO作成
+
+# ログ出力修正
+
+# TODO作成
+
+既存調査
+
+現状調査
+コマンド仕様検討
+コード構成検討
+基本機能単体
+    SSH 疎通
+    リクエストメッセージ生成
+    レスポンスデータ受信
+    MIME 生成
+    MIME 解析
+各アクション実装
+    admin
+        添付なし
+            checkAgent
+            getLatestBuild
+            getLatestVersion
+        添付あり
+            registAgent
+            downloadUpdateModule
+    agent
+        添付なし
+            sendMessage
+            reserveSender
+        添付あり
+            downloadCertificate
+            sendData
+結合
+    getperf_agent
+    getperfctl
+
+

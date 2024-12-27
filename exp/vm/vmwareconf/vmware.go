@@ -109,9 +109,10 @@ func (e *VMWare) Run(ctx context.Context, env *cfg.RunEnv) error {
 	if len(e.Servers) > 0 {
 		for _, addedServer := range e.Servers {
 			log.Info("search added vm : ", addedServer)
-			refAddedVm, err := finder.VirtualMachine(ctx, addedServer)
+			// refAddedVms, err := finder.VirtualMachine(ctx, addedServer)
+			refAddedVms, err := finder.VirtualMachineList(ctx, addedServer)
 			if err == nil {
-				refVms = append(refVms, refAddedVm)
+				refVms = append(refVms, refAddedVms[0])
 			} else {
 				return HandleError(errFile, err, "get remote vm defined in 'servers' parameter")
 			}

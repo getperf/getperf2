@@ -224,12 +224,43 @@ func (config *Config) ArchiveData(task *Task, datastore *Datastore) error {
 	return config.TruncateBackupData(task, datastore)
 }
 
+func (config *Config) SendCollectorDataInternal(zip string) error {
+	if err := config.RunFileTransfer(true, zip); err != nil {
+		return errors.Wrap(err, "run file transfer(send)")
+	}
+	zipPath := config.GetArchivefilePath(zip)
+	if err := os.Remove(zipPath); err != nil {
+		return errors.Wrap(err, "zip archive truncate after send")
+	}
+	return nil
+}
+
 func (config *Config) SendCollectorData(zip string) error {
-	cmd := filepath.Join(config.BinDir, "getperfsoap")
+	cmdLine := ""
 	confFile := config.ParameterFile
-	cmdLine := fmt.Sprintf("%s --send -c %s %s", cmd, confFile, zip)
+	postSoapCmdType := config.Schedule.PostSoapCmdType
+	switch postSoapCmdType {
+	case "Legacy":
+		cmd := "getperfsoap"
+		cmdPath := filepath.Join(config.BinDir, cmd)
+		cmdLine = fmt.Sprintf("%s --send -c %s %s", cmdPath, confFile, zip)
+
+	case "Go":
+		cmd := "getperf2"
+		cmdPath := filepath.Join(config.BinDir, cmd)
+		cmdLine = fmt.Sprintf("%s sender --send -c %s %s", cmdPath, confFile, zip)
+
+	case "Internal":
+		if err := config.SendCollectorDataInternal(zip); err != nil {
+			log.Errorf("run file transfer(send):%s", err)
+		}
+		return nil
+
+	default:
+		return fmt.Errorf("unkown POST_SOAP_CMD_TYPE [Legacy,Internal] %v", postSoapCmdType)
+	}
 	log.Info("send   ", zip)
-	log.Debug("COMMAND ", cmdLine)
+	log.Info("COMMAND ", cmdLine)
 	CmdInfo := &CommandInfo{
 		CmdLine: cmdLine,
 		Timeout: 15,
@@ -285,7 +316,7 @@ func (config *Config) PurgeData(task *Task, datastore *Datastore) error {
 	for _, dateDir := range dateDirs {
 		if dateDir.Name() < checkDate {
 			purgeDir := filepath.Join(logDir, dateDir.Name())
-			fmt.Printf("remove %s\n", purgeDir)
+			// fmt.Printf("remove %s\n", purgeDir)
 			if err := os.RemoveAll(purgeDir); err != nil {
 				return err
 			}
@@ -302,7 +333,7 @@ func (config *Config) PurgeData(task *Task, datastore *Datastore) error {
 	for _, timeDir := range timeDirs {
 		if timeDir.Name() < checkTime {
 			purgeDir := filepath.Join(checkDatePath, timeDir.Name())
-			fmt.Printf("remove %s\n", purgeDir)
+			// fmt.Printf("remove %s\n", purgeDir)
 			if err := os.RemoveAll(purgeDir); err != nil {
 				return err
 			}
@@ -351,17 +382,26 @@ func (config *Config) CheckLicense(expired int) error {
 func (config *Config) DownloadLicense() error {
 	cmd := filepath.Join(config.BinDir, "getperfsoap")
 	confFile := config.ParameterFile
-	cmdLine := fmt.Sprintf("%s --get -c %s %s", cmd, confFile, "sslconf.zip")
-	log.Info("Get ", cmdLine)
-	CmdInfo := &CommandInfo{
-		CmdLine: cmdLine,
-		Timeout: config.Schedule.SoapTimeout,
-	}
-	if err := CmdInfo.ExecCommandNoRedirect(); err != nil {
-		return fmt.Errorf("failed to get sslconf.zip %s", err)
-	}
-	if CmdInfo.ExitCode != 0 {
-		return fmt.Errorf("failed to get sslconf.zip")
+	postSoapCmdType := config.Schedule.PostSoapCmdType
+	switch postSoapCmdType {
+	case "Legacy":
+		cmdLine := fmt.Sprintf("%s --get -c %s %s", cmd, confFile, "sslconf.zip")
+		log.Info("Get ", cmdLine)
+		CmdInfo := &CommandInfo{
+			CmdLine: cmdLine,
+			Timeout: config.Schedule.SoapTimeout,
+		}
+		if err := CmdInfo.ExecCommandNoRedirect(); err != nil {
+			return fmt.Errorf("failed to get sslconf.zip %s", err)
+		}
+		if CmdInfo.ExitCode != 0 {
+			return fmt.Errorf("failed to get sslconf.zip")
+		}
+
+	case "Internal":
+		return config.RunFileTransferDownloadLicense()
+	default:
+		return fmt.Errorf("unkown POST_SOAP_CMD_TYPE [Legacy,Internal] %v", postSoapCmdType)
 	}
 	return nil
 }
@@ -449,9 +489,15 @@ func (config *Config) RunTask(c *Collector, count int, tasks chan<- *Task) {
 }
 
 func (config *Config) RunWithContext(ctx context.Context) error {
+	if persistentPid, err := config.ReadWorkFileNumber(config.PidFile); err == nil {
+		if CheckProcess(persistentPid, "getperf") {
+			return fmt.Errorf("start up failed for another pid file process : %d\n", persistentPid)
+		}
+	}
 	config.InitAgent()
 	config.LoadLicense()
 	log.Info("run agent with conext")
+
 	if err := config.CheckLicense(0); err != nil {
 		return errors.Wrap(err, "License ... NG")
 	}
@@ -459,7 +505,8 @@ func (config *Config) RunWithContext(ctx context.Context) error {
 	config.WriteLineWorkFile("_running_flg", "")
 	log.Infof("WEB_SERVICE %v,%v", config.Schedule.WebServiceEnable, config.Schedule.WebServiceUrl)
 	if config.Schedule.WebServiceEnable {
-		go config.RunWebService(ctx)
+		log.Info("todo : verify web service")
+		// go config.RunWebService(ctx)
 	}
 	// go testServer()
 	collectors := config.Schedule.Collectors

@@ -1,0 +1,84 @@
+証明書発行
+SSL 疎通テスト
+
+# 証明書発行
+
+サーバ証明書発行
+
+rex server_cert
+
+2023/05/08 08:42:05 [NOTICE] openssl req -new -sha256 -key /etc/getperf/ssl/server/server.key -out /etc/getperf/ssl/server/server.csr -subj "/commonName=192.168.231.160" -addext "subjectAltName = DNS:192.168.231.160, IP:192.168.231.160"
+2023/05/08 08:42:05 [NOTICE] openssl ca -in /etc/getperf/ssl/server/server.csr -out /etc/getperf/ssl/server/server.crt -extfile /etc/getperf/ssl/server/san.txt -config /etc/getperf/ssl/inter/ca.conf -batch
+
+rex restart_ws_admin
+rex restart_ws_data
+
+http://alma8.toshiba.co.jp:57000/axis2/services/listServices
+
+クライアント証明書発行
+
+more network/License.txt
+HOSTNAME=alma8
+
+ssladmin.pl client_cert [--sitekey=site] [--agent=host]]|
+
+ssladmin.pl client_cert --sitekey=site --agent=host
+
+ ~/ptune/bin/getperfctl setup
+ ~/ptune/bin/getperfctl setup
+Invalid build number
+CentOS6-x86_64 コアモジュールの確認に失敗しました
+サイトキーを入力して下さい [site1]:
+アクセスキーを入力して下さい [81e6011f1c0660a8062dbe4ade4e910d841d36c4]:
+
+cp -p ~/ptune/network/* ./network/
+
+# SSQL疎通テスト
+
+サーバIPアドレス置換
+
+192.168.0.172
+→
+192.168.231.160
+
+
+go run test1_getLatestBuild/main.go
+
+2023/05/08 08:53:07 soap call error Post "https://192.168.231.160:57443/axis2/se
+rvices/GetperfService.GetperfServiceHttpsSoap11Endpoint/": 
+context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+
+export no_proxy=192.168.231.160
+
+08:58:38.068 [ajp-nio-0:0:0:0:0:0:0:1-57009-exec-2] INFO  com.getperf.perf.SiteConfig - check buid /home/psadmin/getperf/var/docs/agent/update/Linux/2
+08:58:38.091 [ajp-nio-0:0:0:0:0:0:0:1-57009-exec-2] INFO  com.getperf.perf.SiteConfig - build not found
+
+# tomcatログ設定
+
+sub config_apache_axis2_web {
+
+        my $config_template =  'script/template/axis2-web-1.5.6-xml.tpl';
+
+# 管理者用Webサービスの設定
+sudo -E perl ~/getperf/script/deploy-ws.pl config_axis2 --suffix=admin
+
+# データ用Webサービスの設定
+sudo -E perl ~/getperf/script/deploy-ws.pl config_axis2 --suffix=data
+
+# 単体疎通テスト
+
+go run test1_getLatestBuild/main.go
+go run test2_registAgent/main.go
+go run test3_tlsCertificate/main.go
+go run test4_sendMessage/main.go
+go run test5_sendData/main.go
+
+ com.getperf.perf.AgentLicense - Site site1 access key check failed.
+
+ INFO  com.getperf.perf.StagingFileHandler - File not found, skip as first creation : json/site1/site1__host1__Linux.json
+
+json/site1/site1__host1__Linux.json 原因調査
+
+sendData で terminal が文字化けする
+
+

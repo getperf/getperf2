@@ -1,0 +1,757 @@
+This XML file does not appear to have any style information associated with it. The document tree is shown below.
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://perf.getperf.com" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax22="http://io.java/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax21="http://rmi.java/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://perf.getperf.com">
+<wsdl:documentation>GetperfService</wsdl:documentation>
+<wsdl:types>
+<xs:schema xmlns:ax24="http://io.java/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://rmi.java/xsd">
+<xs:import namespace="http://io.java/xsd"/>
+<xs:complexType name="RemoteException">
+<xs:complexContent>
+<xs:extension base="ax24:IOException">
+<xs:sequence>
+<xs:element minOccurs="0" name="cause" nillable="true" type="xs:anyType"/>
+<xs:element minOccurs="0" name="message" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+</xs:schema>
+<xs:schema xmlns:ax23="http://perf.getperf.com" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://io.java/xsd">
+<xs:import namespace="http://perf.getperf.com"/>
+<xs:complexType name="IOException">
+<xs:complexContent>
+<xs:extension base="ax23:Exception">
+<xs:sequence/>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+</xs:schema>
+<xs:schema xmlns:ax25="http://rmi.java/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://perf.getperf.com">
+<xs:import namespace="http://rmi.java/xsd"/>
+<xs:element name="helloService">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="msg" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="helloServiceResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="helloJedis">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="msg" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="helloJedisResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:complexType name="Exception">
+<xs:sequence>
+<xs:element minOccurs="0" name="Exception" nillable="true" type="xs:anyType"/>
+</xs:sequence>
+</xs:complexType>
+<xs:element name="RemoteException">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="RemoteException" nillable="true" type="ax25:RemoteException"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="testGetAttachedFileResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="checkAgent">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="siteKey" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="hostname" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="accessKey" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="checkAgentResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="registAgent">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="siteKey" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="hostname" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="accessKey" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="registAgentResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="getLatestVersionResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="getLatestBuild">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="moduleTag" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="majorVer" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="getLatestBuildResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="downloadUpdateModule">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="moduleTag" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="majorVer" type="xs:int"/>
+<xs:element minOccurs="0" name="build" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="downloadUpdateModuleResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="downloadCertificate">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="siteKey" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="hostname" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="timestamp" type="xs:long"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="downloadCertificateResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="reserveSender">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="siteKey" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="filename" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="size" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="reserveSenderResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="sendData">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="siteKey" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="filename" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="sendDataResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="sendMessage">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="siteKey" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="hostname" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="severity" type="xs:int"/>
+<xs:element minOccurs="0" name="message" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="sendMessageResponse">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:schema>
+</wsdl:types>
+<wsdl:message name="helloJedisRequest">
+<wsdl:part name="parameters" element="ns:helloJedis"/>
+</wsdl:message>
+<wsdl:message name="helloJedisResponse">
+<wsdl:part name="parameters" element="ns:helloJedisResponse"/>
+</wsdl:message>
+<wsdl:message name="sendDataRequest">
+<wsdl:part name="parameters" element="ns:sendData"/>
+</wsdl:message>
+<wsdl:message name="sendDataResponse">
+<wsdl:part name="parameters" element="ns:sendDataResponse"/>
+</wsdl:message>
+<wsdl:message name="RemoteException">
+<wsdl:part name="parameters" element="ns:RemoteException"/>
+</wsdl:message>
+<wsdl:message name="getLatestBuildRequest">
+<wsdl:part name="parameters" element="ns:getLatestBuild"/>
+</wsdl:message>
+<wsdl:message name="getLatestBuildResponse">
+<wsdl:part name="parameters" element="ns:getLatestBuildResponse"/>
+</wsdl:message>
+<wsdl:message name="sendMessageRequest">
+<wsdl:part name="parameters" element="ns:sendMessage"/>
+</wsdl:message>
+<wsdl:message name="sendMessageResponse">
+<wsdl:part name="parameters" element="ns:sendMessageResponse"/>
+</wsdl:message>
+<wsdl:message name="testGetAttachedFileRequest"/>
+<wsdl:message name="testGetAttachedFileResponse">
+<wsdl:part name="parameters" element="ns:testGetAttachedFileResponse"/>
+</wsdl:message>
+<wsdl:message name="downloadCertificateRequest">
+<wsdl:part name="parameters" element="ns:downloadCertificate"/>
+</wsdl:message>
+<wsdl:message name="downloadCertificateResponse">
+<wsdl:part name="parameters" element="ns:downloadCertificateResponse"/>
+</wsdl:message>
+<wsdl:message name="reserveSenderRequest">
+<wsdl:part name="parameters" element="ns:reserveSender"/>
+</wsdl:message>
+<wsdl:message name="reserveSenderResponse">
+<wsdl:part name="parameters" element="ns:reserveSenderResponse"/>
+</wsdl:message>
+<wsdl:message name="checkAgentRequest">
+<wsdl:part name="parameters" element="ns:checkAgent"/>
+</wsdl:message>
+<wsdl:message name="checkAgentResponse">
+<wsdl:part name="parameters" element="ns:checkAgentResponse"/>
+</wsdl:message>
+<wsdl:message name="registAgentRequest">
+<wsdl:part name="parameters" element="ns:registAgent"/>
+</wsdl:message>
+<wsdl:message name="registAgentResponse">
+<wsdl:part name="parameters" element="ns:registAgentResponse"/>
+</wsdl:message>
+<wsdl:message name="helloServiceRequest">
+<wsdl:part name="parameters" element="ns:helloService"/>
+</wsdl:message>
+<wsdl:message name="helloServiceResponse">
+<wsdl:part name="parameters" element="ns:helloServiceResponse"/>
+</wsdl:message>
+<wsdl:message name="downloadUpdateModuleRequest">
+<wsdl:part name="parameters" element="ns:downloadUpdateModule"/>
+</wsdl:message>
+<wsdl:message name="downloadUpdateModuleResponse">
+<wsdl:part name="parameters" element="ns:downloadUpdateModuleResponse"/>
+</wsdl:message>
+<wsdl:message name="getLatestVersionRequest"/>
+<wsdl:message name="getLatestVersionResponse">
+<wsdl:part name="parameters" element="ns:getLatestVersionResponse"/>
+</wsdl:message>
+<wsdl:portType name="GetperfServicePortType">
+<wsdl:operation name="helloJedis">
+<wsdl:input message="ns:helloJedisRequest" wsaw:Action="urn:helloJedis"/>
+<wsdl:output message="ns:helloJedisResponse" wsaw:Action="urn:helloJedisResponse"/>
+</wsdl:operation>
+<wsdl:operation name="sendData">
+<wsdl:input message="ns:sendDataRequest" wsaw:Action="urn:sendData"/>
+<wsdl:output message="ns:sendDataResponse" wsaw:Action="urn:sendDataResponse"/>
+<wsdl:fault message="ns:RemoteException" name="RemoteException" wsaw:Action="urn:sendDataRemoteException"/>
+</wsdl:operation>
+<wsdl:operation name="getLatestBuild">
+<wsdl:input message="ns:getLatestBuildRequest" wsaw:Action="urn:getLatestBuild"/>
+<wsdl:output message="ns:getLatestBuildResponse" wsaw:Action="urn:getLatestBuildResponse"/>
+<wsdl:fault message="ns:RemoteException" name="RemoteException" wsaw:Action="urn:getLatestBuildRemoteException"/>
+</wsdl:operation>
+<wsdl:operation name="sendMessage">
+<wsdl:input message="ns:sendMessageRequest" wsaw:Action="urn:sendMessage"/>
+<wsdl:output message="ns:sendMessageResponse" wsaw:Action="urn:sendMessageResponse"/>
+<wsdl:fault message="ns:RemoteException" name="RemoteException" wsaw:Action="urn:sendMessageRemoteException"/>
+</wsdl:operation>
+<wsdl:operation name="testGetAttachedFile">
+<wsdl:input message="ns:testGetAttachedFileRequest" wsaw:Action="urn:testGetAttachedFile"/>
+<wsdl:output message="ns:testGetAttachedFileResponse" wsaw:Action="urn:testGetAttachedFileResponse"/>
+<wsdl:fault message="ns:RemoteException" name="RemoteException" wsaw:Action="urn:testGetAttachedFileRemoteException"/>
+</wsdl:operation>
+<wsdl:operation name="downloadCertificate">
+<wsdl:input message="ns:downloadCertificateRequest" wsaw:Action="urn:downloadCertificate"/>
+<wsdl:output message="ns:downloadCertificateResponse" wsaw:Action="urn:downloadCertificateResponse"/>
+<wsdl:fault message="ns:RemoteException" name="RemoteException" wsaw:Action="urn:downloadCertificateRemoteException"/>
+</wsdl:operation>
+<wsdl:operation name="reserveSender">
+<wsdl:input message="ns:reserveSenderRequest" wsaw:Action="urn:reserveSender"/>
+<wsdl:output message="ns:reserveSenderResponse" wsaw:Action="urn:reserveSenderResponse"/>
+<wsdl:fault message="ns:RemoteException" name="RemoteException" wsaw:Action="urn:reserveSenderRemoteException"/>
+</wsdl:operation>
+<wsdl:operation name="checkAgent">
+<wsdl:input message="ns:checkAgentRequest" wsaw:Action="urn:checkAgent"/>
+<wsdl:output message="ns:checkAgentResponse" wsaw:Action="urn:checkAgentResponse"/>
+<wsdl:fault message="ns:RemoteException" name="RemoteException" wsaw:Action="urn:checkAgentRemoteException"/>
+</wsdl:operation>
+<wsdl:operation name="registAgent">
+<wsdl:input message="ns:registAgentRequest" wsaw:Action="urn:registAgent"/>
+<wsdl:output message="ns:registAgentResponse" wsaw:Action="urn:registAgentResponse"/>
+<wsdl:fault message="ns:RemoteException" name="RemoteException" wsaw:Action="urn:registAgentRemoteException"/>
+</wsdl:operation>
+<wsdl:operation name="helloService">
+<wsdl:input message="ns:helloServiceRequest" wsaw:Action="urn:helloService"/>
+<wsdl:output message="ns:helloServiceResponse" wsaw:Action="urn:helloServiceResponse"/>
+</wsdl:operation>
+<wsdl:operation name="downloadUpdateModule">
+<wsdl:input message="ns:downloadUpdateModuleRequest" wsaw:Action="urn:downloadUpdateModule"/>
+<wsdl:output message="ns:downloadUpdateModuleResponse" wsaw:Action="urn:downloadUpdateModuleResponse"/>
+<wsdl:fault message="ns:RemoteException" name="RemoteException" wsaw:Action="urn:downloadUpdateModuleRemoteException"/>
+</wsdl:operation>
+<wsdl:operation name="getLatestVersion">
+<wsdl:input message="ns:getLatestVersionRequest" wsaw:Action="urn:getLatestVersion"/>
+<wsdl:output message="ns:getLatestVersionResponse" wsaw:Action="urn:getLatestVersionResponse"/>
+<wsdl:fault message="ns:RemoteException" name="RemoteException" wsaw:Action="urn:getLatestVersionRemoteException"/>
+</wsdl:operation>
+</wsdl:portType>
+<wsdl:binding name="GetperfServiceSoap11Binding" type="ns:GetperfServicePortType">
+<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+<wsdl:operation name="helloJedis">
+<soap:operation soapAction="urn:helloJedis" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="sendData">
+<soap:operation soapAction="urn:sendData" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="getLatestBuild">
+<soap:operation soapAction="urn:getLatestBuild" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="sendMessage">
+<soap:operation soapAction="urn:sendMessage" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="testGetAttachedFile">
+<soap:operation soapAction="urn:testGetAttachedFile" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="downloadCertificate">
+<soap:operation soapAction="urn:downloadCertificate" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="reserveSender">
+<soap:operation soapAction="urn:reserveSender" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="checkAgent">
+<soap:operation soapAction="urn:checkAgent" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="registAgent">
+<soap:operation soapAction="urn:registAgent" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="helloService">
+<soap:operation soapAction="urn:helloService" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="downloadUpdateModule">
+<soap:operation soapAction="urn:downloadUpdateModule" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="getLatestVersion">
+<soap:operation soapAction="urn:getLatestVersion" style="document"/>
+<wsdl:input>
+<soap:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+</wsdl:binding>
+<wsdl:binding name="GetperfServiceSoap12Binding" type="ns:GetperfServicePortType">
+<soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+<wsdl:operation name="helloJedis">
+<soap12:operation soapAction="urn:helloJedis" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="sendData">
+<soap12:operation soapAction="urn:sendData" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap12:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="getLatestBuild">
+<soap12:operation soapAction="urn:getLatestBuild" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap12:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="sendMessage">
+<soap12:operation soapAction="urn:sendMessage" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap12:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="testGetAttachedFile">
+<soap12:operation soapAction="urn:testGetAttachedFile" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap12:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="downloadCertificate">
+<soap12:operation soapAction="urn:downloadCertificate" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap12:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="reserveSender">
+<soap12:operation soapAction="urn:reserveSender" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap12:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="checkAgent">
+<soap12:operation soapAction="urn:checkAgent" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap12:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="registAgent">
+<soap12:operation soapAction="urn:registAgent" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap12:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="helloService">
+<soap12:operation soapAction="urn:helloService" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="downloadUpdateModule">
+<soap12:operation soapAction="urn:downloadUpdateModule" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap12:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+<wsdl:operation name="getLatestVersion">
+<soap12:operation soapAction="urn:getLatestVersion" style="document"/>
+<wsdl:input>
+<soap12:body use="literal"/>
+</wsdl:input>
+<wsdl:output>
+<soap12:body use="literal"/>
+</wsdl:output>
+<wsdl:fault name="RemoteException">
+<soap12:fault use="literal" name="RemoteException"/>
+</wsdl:fault>
+</wsdl:operation>
+</wsdl:binding>
+<wsdl:binding name="GetperfServiceHttpBinding" type="ns:GetperfServicePortType">
+<http:binding verb="POST"/>
+<wsdl:operation name="helloJedis">
+<http:operation location="GetperfService/helloJedis"/>
+<wsdl:input>
+<mime:content type="text/xml" part="helloJedis"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="helloJedis"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="sendData">
+<http:operation location="GetperfService/sendData"/>
+<wsdl:input>
+<mime:content type="text/xml" part="sendData"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="sendData"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="getLatestBuild">
+<http:operation location="GetperfService/getLatestBuild"/>
+<wsdl:input>
+<mime:content type="text/xml" part="getLatestBuild"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="getLatestBuild"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="sendMessage">
+<http:operation location="GetperfService/sendMessage"/>
+<wsdl:input>
+<mime:content type="text/xml" part="sendMessage"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="sendMessage"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="testGetAttachedFile">
+<http:operation location="GetperfService/testGetAttachedFile"/>
+<wsdl:input>
+<mime:content type="text/xml" part="testGetAttachedFile"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="testGetAttachedFile"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="downloadCertificate">
+<http:operation location="GetperfService/downloadCertificate"/>
+<wsdl:input>
+<mime:content type="text/xml" part="downloadCertificate"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="downloadCertificate"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="reserveSender">
+<http:operation location="GetperfService/reserveSender"/>
+<wsdl:input>
+<mime:content type="text/xml" part="reserveSender"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="reserveSender"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="checkAgent">
+<http:operation location="GetperfService/checkAgent"/>
+<wsdl:input>
+<mime:content type="text/xml" part="checkAgent"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="checkAgent"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="registAgent">
+<http:operation location="GetperfService/registAgent"/>
+<wsdl:input>
+<mime:content type="text/xml" part="registAgent"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="registAgent"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="helloService">
+<http:operation location="GetperfService/helloService"/>
+<wsdl:input>
+<mime:content type="text/xml" part="helloService"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="helloService"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="downloadUpdateModule">
+<http:operation location="GetperfService/downloadUpdateModule"/>
+<wsdl:input>
+<mime:content type="text/xml" part="downloadUpdateModule"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="downloadUpdateModule"/>
+</wsdl:output>
+</wsdl:operation>
+<wsdl:operation name="getLatestVersion">
+<http:operation location="GetperfService/getLatestVersion"/>
+<wsdl:input>
+<mime:content type="text/xml" part="getLatestVersion"/>
+</wsdl:input>
+<wsdl:output>
+<mime:content type="text/xml" part="getLatestVersion"/>
+</wsdl:output>
+</wsdl:operation>
+</wsdl:binding>
+<wsdl:service name="GetperfService">
+<wsdl:port name="GetperfServiceHttpsSoap11Endpoint" binding="ns:GetperfServiceSoap11Binding">
+<soap:address location="https://alma8.toshiba.co.jp:57443/axis2/services/GetperfService.GetperfServiceHttpsSoap11Endpoint/"/>
+</wsdl:port>
+<wsdl:port name="GetperfServiceHttpSoap11Endpoint" binding="ns:GetperfServiceSoap11Binding">
+<soap:address location="http://alma8.toshiba.co.jp:57000/axis2/services/GetperfService.GetperfServiceHttpSoap11Endpoint/"/>
+</wsdl:port>
+<wsdl:port name="GetperfServiceHttpSoap12Endpoint" binding="ns:GetperfServiceSoap12Binding">
+<soap12:address location="http://alma8.toshiba.co.jp:57000/axis2/services/GetperfService.GetperfServiceHttpSoap12Endpoint/"/>
+</wsdl:port>
+<wsdl:port name="GetperfServiceHttpsSoap12Endpoint" binding="ns:GetperfServiceSoap12Binding">
+<soap12:address location="https://alma8.toshiba.co.jp:57443/axis2/services/GetperfService.GetperfServiceHttpsSoap12Endpoint/"/>
+</wsdl:port>
+<wsdl:port name="GetperfServiceHttpsEndpoint" binding="ns:GetperfServiceHttpBinding">
+<http:address location="https://alma8.toshiba.co.jp:57443/axis2/services/GetperfService.GetperfServiceHttpsEndpoint/"/>
+</wsdl:port>
+<wsdl:port name="GetperfServiceHttpEndpoint" binding="ns:GetperfServiceHttpBinding">
+<http:address location="http://alma8.toshiba.co.jp:57000/axis2/services/GetperfService.GetperfServiceHttpEndpoint/"/>
+</wsdl:port>
+</wsdl:service>
+</wsdl:definitions>

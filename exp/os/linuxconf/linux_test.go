@@ -1,6 +1,9 @@
 package linuxconf
 
 import (
+	"github.com/getperf/getperf2/common/sshx"
+
+	// ToDo: SSH接続タイムアウトの実装
 	"testing"
 )
 
@@ -16,7 +19,7 @@ func TestLinuxUri(t *testing.T) {
 		{"hoge:", "hoge", "22"},
 	}
 	for _, test := range tests {
-		ip, port, err := parseSshUrl(test.uri)
+		ip, port, err := sshx.ParseSshUrl(test.uri)
 		if err != nil {
 			t.Error(err)
 		}

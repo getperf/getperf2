@@ -3,7 +3,6 @@ package agent
 import (
 	"context"
 	"flag"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -34,8 +33,11 @@ func Run(ctx context.Context, argv []string, stdout, stderr io.Writer) error {
 	flag.StringVar(s, "s", "", "")
 	flag.BoolVar(b, "b", true, "")
 	flag.BoolVar(f, "f", false, "")
-	flag.Parse()
+	flag.Usage = func() {
+		PrintUsage()
+	}
 
+	flag.Parse()
 	hostName, err := GetHostname()
 	if err != nil {
 		log.Fatal("get hostname ", err)
@@ -82,8 +84,4 @@ func Run(ctx context.Context, argv []string, stdout, stderr io.Writer) error {
 		return config.RunWithContext(ctx)
 	}
 	return nil
-}
-
-func VersionMessage() string {
-	return fmt.Sprintf("%s v%s (rev:%s)\n", cmdName, Version, Revision)
 }

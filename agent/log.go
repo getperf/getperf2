@@ -26,9 +26,9 @@ func SetLogLevel(level int) error {
 		log.SetLevel(log.FatalLevel)
 	case 2, 3:
 		log.SetLevel(log.ErrorLevel)
-	case 4, 5:
+	case 4:
 		log.SetLevel(log.WarnLevel)
-	case 6:
+	case 5, 6:
 		log.SetLevel(log.InfoLevel)
 	case 7:
 		log.SetLevel(log.DebugLevel)

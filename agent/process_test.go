@@ -120,3 +120,43 @@ func TestExecCommandNoRedirect(t *testing.T) {
 		t.Error("command output")
 	}
 }
+
+func TestExecCommandNotFound(t *testing.T) {
+	// SetLogLevel(7)
+	CmdInfo := &CommandInfo{
+		CmdLine: "hogehoge",
+		Timeout: 2,
+	}
+	_ = CmdInfo.ExecCommandNoRedirect()
+	if CmdInfo.Executed == false {
+		t.Error("command not execute")
+	}
+	t.Log("OUT : ", CmdInfo.OutBuf)
+	if CmdInfo.ExitCode == 0 {
+		t.Error("command output")
+	}
+}
+
+func TestExecPs(t *testing.T) {
+	logDir, _ := ioutil.TempDir("", "log")
+	defer os.RemoveAll(logDir)
+
+	CmdInfo := &CommandInfo{
+		CmdLine: "/bin/ps2 -eo pid,ppid",
+		OutPath: filepath.Join(logDir, "stub/out.txt"),
+		Timeout: 2,
+	}
+	err := CmdInfo.ExecCommandRedirect()
+	if CmdInfo.Executed == false {
+		t.Error("command not execute redirect outfile including directory")
+	}
+	t.Log("ERR : ", err)
+	t.Log("RES : ", *CmdInfo)
+
+	outBuf, _ := ioutil.ReadFile(CmdInfo.OutPath)
+	t.Log("OUT: ", string(outBuf))
+	// z := bytes.NewBuffer(outBuf)
+	// if decodeBytes(outBuf) != "OUT TEST\nERR TEST\n" {
+	// 	t.Error("command output")
+	// }
+}

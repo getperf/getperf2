@@ -29,16 +29,21 @@ test:
 lint: devel-deps
 	golint -set_exit_status
 
+.PHONY: buildgetperf
+buildgetperf:
+	go build -ldflags=$(BUILD_LDFLAGS)  -o ./bin/_getperf ./cmd/getperf2
+	GOOS=windows GOARCH=386 go build -ldflags=$(BUILD_LDFLAGS) -o ./bin/getperf.exe ./cmd/getperf2
+
 .PHONY: build
 build:
-	go build -ldflags=$(BUILD_LDFLAGS) ./cmd/getperf
+	go build -ldflags=$(BUILD_LDFLAGS) -o ./bin/_getperf ./cmd/getperf2
 	go build -ldflags=$(BUILD_LDFLAGS) ./cmd/gconf
-	GOOS=windows GOARCH=386 go build -ldflags=$(BUILD_LDFLAGS) ./cmd/getperf
+	GOOS=windows GOARCH=386 go build -ldflags=$(BUILD_LDFLAGS) -o ./bin/getperf.exe ./cmd/getperf2
 	GOOS=windows GOARCH=386 go build -ldflags=$(BUILD_LDFLAGS) ./cmd/gconf
 
 .PHONY: install
 install:
-	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/getperf
+	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/getperf2
 	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/gconf
 
 .PHONY: release

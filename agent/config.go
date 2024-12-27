@@ -162,8 +162,8 @@ func NewConfig(home string, configEnv *ConfigEnv) *Config {
 	// SSL証明書定義
 	config.SslDir = sslDir                                  // プログラム名
 	config.CacertFile = filepath.Join(sslDir, "ca.crt")     // CAルート証明書
-	config.ClcertFile = filepath.Join(sslDir, "clcert.pem") // PM用CAルート証明書
-	config.ClkeyFile = filepath.Join(sslDir, "client.pem")
+	config.ClcertFile = filepath.Join(sslDir, "client.crt") // PM用クライアント証明書
+	config.ClkeyFile = filepath.Join(sslDir, "client.key")  // PM用クライアントキー
 	config.LicenseFile = filepath.Join(sslDir, "License.txt") // ライセンスファイル
 
 	config.SvParamFile = filepath.Join(sslDir, "server", "server.ini") // Webサービス設定ファイル

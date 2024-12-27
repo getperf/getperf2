@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -36,7 +37,8 @@ func TestParseConfigLineBool(t *testing.T) {
 func TestParseConfigLineCommand(t *testing.T) {
 	schedule := NewSchedule()
 	schedule.ParseConfigLine("HANODE_CMD = hastat.pl -s service1")
-	if schedule.HanodeCmd != "hastat.pl -s service1" {
+	schedule.ParseConfigLine("POST_SOAP_CMD_TYPE = Internal")
+	if schedule.HanodeCmd != "hastat.pl -s service1" || schedule.PostSoapCmdType != "Internal" {
 		t.Error("parse command")
 	}
 }
@@ -70,7 +72,7 @@ func TestParseCollectorLineCommand(t *testing.T) {
 }
 
 func TestParseWorkerLineCommand(t *testing.T) {
-	if job := stringToJob("'vmstat 3 3 > _odir_/vmstat.txt'"); job.Cmd != "vmstat 3 3 > _odir_/vmstat.txt" {
+	if job := stringToJob("\"vmstat 3 3 > _odir_/vmstat.txt\""); job.Cmd != "vmstat 3 3 > _odir_/vmstat.txt" {
 		t.Error("parse job 1 ", job.Cmd)
 	}
 	if job := stringToJob("vmstat 3 3 > _odir_/vmstat.txt"); job != nil {
@@ -83,10 +85,42 @@ func TestParseWorkerLineCommand(t *testing.T) {
 		t.Error("parse invalid job 3 : ", job.Ofile)
 	}
 	if job := stringToJob("\"netstat -s\"\t, netstat.txt"); job.Ofile != "netstat.txt" {
-		t.Error("parse invalid job 4 : ", job.Ofile)
+		t.Errorf("parse invalid job 4 : %v", job)
 	}
 	if job := stringToJob("\"netstat -s\"\t, netstat.txt, 30, 10"); job.Step != 10 {
 		t.Error("parse invalid job 5 : ", job.Step)
+	}
+}
+
+func TestParsePsCommand(t *testing.T) {
+	schedule := NewSchedule()
+	schedule.ParseConfigLine("STAT_CMD.Process = \"/bin/ps -eo pid,ppid,group,user,time,vsz,rss,command\", psutil.txt, 30, 11")
+	job := schedule.Collectors["Process"].Jobs[0]
+	t.Log("JOB:", job)
+}
+
+func TestParserPsRegex(t *testing.T) {
+	// "文字列"|'文字列',... を解析、
+	tests := []struct {
+		command  string
+		interval int
+		count    int
+	}{
+		{command: "\"/bin/ps 'test' -eo pid,ppid,group,user,time,vsz,rss,command\""},
+		{command: "'/bin/ps \"test\" -eo pid,ppid,group,user,time,vsz,rss,command'"},
+		{command: "\"/bin/ps 'test' -eo pid,ppid,group,user,time,vsz,rss,command\", psutil.txt"},
+		{command: "'/bin/ps \"test\" -eo pid,ppid,group,user,time,vsz,rss,command', psutil.txt", interval: 0},
+		{command: "\"/bin/ps 'test' -eo pid,ppid,group,user,time,vsz,rss,command\", psutil.txt, 30, 11", interval: 30, count: 11},
+		{command: "'/bin/ps \"test\" -eo pid,ppid,group,user,time,vsz,rss,command', psutil.txt, 30, 11", interval: 30, count: 11},
+	}
+	for _, tc := range tests {
+		t.Log("TEST", tc.command)
+		job := stringToJob(tc.command)
+		if job == nil || !strings.Contains(job.Cmd, "/bin/ps") ||
+			job.Cycle != tc.interval || job.Step != tc.count {
+			t.Errorf("parse error %s", tc.command)
+		}
+		// t.Log(job.Cmd)
 	}
 }
 

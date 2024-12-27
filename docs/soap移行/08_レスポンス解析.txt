@@ -1,0 +1,38 @@
+現行調査
+修正調査
+レグレッション
+プロト
+
+# 現行調査
+
+```golang
+    type Response struct {
+        Header interface{} `xml:"soapenv:Header" json:"Header"`
+    }
+
+    r := &Response{}
+
+    fmt.Printf("Part : %q\n", slurp)
+    if strings.HasSuffix(mediaType, "/xml") {
+        err = xml.Unmarshal(slurp, &r)
+    }
+    fmt.Printf("XML DECODE:%v, %v\n", r, err)
+```
+
+```xml
+<?xml version='1.0' encoding='UTF-8'?><soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Header xmlns:wsa=\"http://www.w3.org/2005/08/addressing\"><wsa:Action>urn:getLatestBuildResponse</wsa:Action><wsa:RelatesTo>urn:uuid:bfd15f5f-c832-459a-935b-201494336637</wsa:RelatesTo></soapenv:Header><soapenv:Body><ns:getLatestBuildResponse xmlns:ns=\"http://perf.getperf.com\"><ns:return>0</ns:return></ns:getLatestBuildResponse></soapenv:Body></soapenv:Envelope>
+```
+
+簡易版で、以下の文字列を抽出し、抽出できない場合はエラーとする処理検討
+
+<ns:return>0</ns:return>
+
+```golang
+func (soapSender *SoapSender)getResponseReturn(msg string)(string, error) {
+    str := "001,ASHITANI Tatsuji, Yokohama"
+    rep := regexp.MustCompile(`\s*,\s*`)
+    result := rep.Split(str, -1)
+    
+    return result[0], nil
+}
+```

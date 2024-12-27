@@ -2,6 +2,7 @@ package agent
 
 import (
 	"bufio"
+	"encoding/csv"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -85,34 +86,70 @@ func convertCommand(word string) string {
 	cmd := strings.TrimSpace(word)
 	m := regexp.MustCompile("^(['\"])(.+)(['\"])$").FindStringSubmatch(cmd)
 	if len(m) != 4 || m[1] != m[3] {
-		log.Error("parse error cmd : ", word)
-		return ""
+		// log.Error("parse error cmd : ", word)
+		return word
 	}
 	return m[2]
 }
 
 func stringToJob(body string) *Job {
-	words := strings.Split(body, ",")
-	cmd := convertCommand(strings.TrimSpace(words[0]))
-	if cmd == "" {
-		return nil
+	patterns := []string{
+		`^'([^']*?)'`,
+		`^"([^"]*?)"`,
 	}
-	job := Job{Cmd: cmd}
-	if len(words) >= 2 {
-		job.Ofile = strings.TrimSpace(words[1])
-	}
-	if len(words) == 4 {
-		label1 := strings.TrimSpace(words[2])
-		if val, err := convertInt(label1, body); err == nil {
-			job.Cycle = val
-		} else {
+	// 1列目の"コマンド"または、'コマンド'を抽出
+	cmd, postfix := "", ""
+	for _, pattern := range patterns {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			log.Errorf("compile regex %s", err)
 			return nil
 		}
-		label2 := strings.TrimSpace(words[3])
-		if val, err := convertInt(label2, body); err == nil {
-			job.Step = val
-		} else {
+		matches := re.FindAllStringSubmatch(body, -1)
+		for _, match := range matches {
+			cmd = match[1]
+			cmd_size := len(match[0])
+			if cmd_size < len(body) {
+				postfix = body[cmd_size+1:]
+			}
+		}
+	}
+	if cmd == "" {
+		log.Errorf("command not found to parse STAT_CMD : %v", body)
+		return nil
+	}
+
+	job := Job{Cmd: cmd}
+	// 2列目移行の、出力ファイル, インターバル, 回数 を抽出
+	if postfix != "" {
+		postfix = strings.Replace(postfix, "\t", "", -1)
+		postfix = strings.TrimSpace(postfix)
+		if postfix[0] == ',' {
+			postfix = postfix[1:]
+		}
+		r := csv.NewReader(strings.NewReader(postfix))
+		words, err := r.Read()
+		log.Debugf("POSTFIX:%s, WORDS:%v\n", postfix, words)
+		if err != nil {
+			log.Errorf("parse STAT_CMD : %v %v", body, err)
 			return nil
+		}
+		if len(words) >= 1 {
+			job.Ofile = strings.TrimSpace(words[0])
+		}
+		if len(words) == 3 {
+			label1 := strings.TrimSpace(words[1])
+			if val, err := convertInt(label1, body); err == nil {
+				job.Cycle = val
+			} else {
+				return nil
+			}
+			label2 := strings.TrimSpace(words[2])
+			if val, err := convertInt(label2, body); err == nil {
+				job.Step = val
+			} else {
+				return nil
+			}
 		}
 	}
 	return &job
@@ -258,6 +295,9 @@ func (schedule *Schedule) ParseConfigLine(line string) {
 	}
 	if body, _ := searchParam(line, "POST_CMD", BASE); body != "" {
 		schedule.PostCmd = body
+	}
+	if body, _ := searchParam(line, "POST_SOAP_CMD_TYPE", BASE); body != "" {
+		schedule.PostSoapCmdType = body
 	}
 	if body, _ := searchParam(line, "REMHOST_ENABLE", BASE); body != "" {
 		if value, err := convertBool(body, line); err == nil {
