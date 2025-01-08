@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"time"
 
@@ -67,9 +68,11 @@ func (task *Task) RunWithContext(ctx context.Context) error {
 	defer os.Chdir(prev)
 	os.Chdir(task.ScriptDir)
 	log.Info("chdir ", task.ScriptDir)
-	if _, err := os.Stat(task.Odir); !os.IsNotExist(err) {
-		if err := os.RemoveAll(task.Odir); err != nil {
-			return fmt.Errorf("run task %s", err)
+	if runtime.GOOS != "windows" {
+		if _, err := os.Stat(task.Odir); !os.IsNotExist(err) {
+			if err := os.RemoveAll(task.Odir); err != nil {
+				log.Errorf("run task %s", err)
+			}
 		}
 	}
 	if err := os.MkdirAll(task.Odir, 0777); err != nil {

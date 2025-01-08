@@ -5,3 +5,4 @@ dist/
 /getperf
 /gconf
 *.exe
+bin/_getperf

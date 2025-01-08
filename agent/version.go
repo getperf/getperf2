@@ -2,7 +2,7 @@ package agent
 
 import "fmt"
 
-const Version = "2.18.0"
+const Version = "2.19.0"
 
 var Revision = "HEAD"
 
