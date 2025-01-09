@@ -68,14 +68,31 @@ func (e *Alletra) Run(ctx context.Context, env *cfg.RunEnv) error {
 				HandleError(errFile, err, metric.Text)
 				continue
 			}
-			e.saveJson(errFile, "arrays.json", arrays)
+			e.saveJson(errFile, "arrays", arrays)
+
 		} else if metric.Id == "disks" {
 			disks, err := groupService.GetDiskService().GetDisks(nil)
 			if err != nil {
 				HandleError(errFile, err, metric.Text)
 				continue
 			} 
-			e.saveJson(errFile, "disks.json", disks)
+			e.saveJson(errFile, "disks", disks)
+
+		} else if metric.Id == "netconfig" {
+			netconfig, err := groupService.GetNetworkConfigService().GetNetworkConfigs(nil)
+			if err != nil {
+				HandleError(errFile, err, metric.Text)
+				continue
+			} 
+			e.saveJson(errFile, "netconfig", netconfig)
+
+		} else if metric.Id == "networks" {
+			networks, err := groupService.NetworkInterfaceService().GetNetworkInterfaces(nil)
+			if err != nil {
+				HandleError(errFile, err, metric.Text)
+				continue
+			} 
+			e.saveJson(errFile, "networks", networks)
 		}
 	}
 	log.Infof("run %s:elapse %s", e.Server, time.Since(startTime))
