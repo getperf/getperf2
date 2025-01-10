@@ -87,7 +87,7 @@ func (e *Alletra) Run(ctx context.Context, env *cfg.RunEnv) error {
 			e.saveJson(errFile, "netconfig", netconfig)
 
 		} else if metric.Id == "networks" {
-			networks, err := groupService.NetworkInterfaceService().GetNetworkInterfaces(nil)
+			networks, err := groupService.GetNetworkInterfaceService().GetNetworkInterfaces(nil)
 			if err != nil {
 				HandleError(errFile, err, metric.Text)
 				continue
